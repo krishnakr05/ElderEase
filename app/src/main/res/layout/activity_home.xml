@@ -111,7 +111,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_app_card"/>
+                tools:listitem="@layout/item_app_card"
+                android:visibility="visible"
+
+
+                />
 
         </LinearLayout>
     </ScrollView>
