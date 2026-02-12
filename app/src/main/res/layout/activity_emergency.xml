@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvGpsStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GPS Location is being shared with family"
+        android:padding="16dp"
+        android:background="#B2EBF2"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <Button
+        android:id="@+id/btnSOS"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:text="HELP\nSOS"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E53935"
+        android:layout_marginTop="40dp" />
+
+    <Button
+        android:id="@+id/btnCancelEmergency"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="CANCEL (5s)"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:id="@+id/tvEmergencyWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Accidental trigger protection active"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp" />
+
+</LinearLayout>
