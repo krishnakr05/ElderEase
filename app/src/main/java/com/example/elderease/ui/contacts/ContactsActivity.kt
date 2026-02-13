@@ -11,6 +11,9 @@ import com.example.elderease.R
 import com.example.elderease.model.ContactInfo
 import com.example.elderease.ui.common.ContactRepository
 import com.example.elderease.ui.home.ContactGridAdapter
+import android.view.View
+import android.widget.Button
+import com.example.elderease.ui.settings.SettingsActivity
 
 class ContactsActivity : AppCompatActivity() {
 
@@ -29,6 +32,18 @@ class ContactsActivity : AppCompatActivity() {
             callContact(contact)
         }
         findViewById<TextView>(R.id.txtTitle).text = "Contacts"
+        findViewById<TextView>(R.id.txtBattery).visibility = View.GONE
+
+        findViewById<Button>(R.id.btnHome).setOnClickListener {
+            finish() // go back to HomeActivity
+        }
+
+        findViewById<Button>(R.id.btnContacts).isEnabled = false
+
+        findViewById<Button>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
     }
 
     private fun callContact(contact: ContactInfo) {
