@@ -24,6 +24,7 @@ import com.example.elderease.model.AppInfo
 import com.example.elderease.model.ContactInfo
 import com.example.elderease.ui.setup.SetupAppsActivity
 import android.util.Log
+import com.example.elderease.ui.contacts.ContactsActivity
 
 class HomeActivity : AppCompatActivity() {
 
@@ -108,6 +109,10 @@ class HomeActivity : AppCompatActivity() {
             callContact(contact)
         }
         */
+        findViewById<android.widget.Button>(R.id.btnContacts).setOnClickListener {
+            startActivity(Intent(this, ContactsActivity::class.java))
+        }
+
 
     }
 
@@ -158,6 +163,7 @@ class HomeActivity : AppCompatActivity() {
      * Loads favorite contacts chosen during setup using saved contact IDs.
      * Uses ContactsContract to resolve current name/phone for each ID.
      */
+    /*
     private fun loadSelectedContacts(): List<ContactInfo> {
         val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
         val raw = prefs.getString("selected_contact_ids", "") ?: ""
@@ -216,6 +222,10 @@ class HomeActivity : AppCompatActivity() {
         return result
     }
 
+    fun loadSelectedContactsCompat(): List<ContactInfo> {
+        return loadSelectedContacts()
+    }
+*/
 
     /**
      * Centralized place to start an app from the grid.

@@ -137,6 +137,7 @@
             android:layout_height="match_parent"/>
 
         <Button
+            android:id="@+id/btnContacts"
             android:text="Contacts"
             android:textStyle="bold"
             android:layout_weight="1"
