@@ -21,30 +21,8 @@
             android:padding="20dp">
 
             <!-- TOP BAR -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:text="ElderEase"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/txtBattery"
-                    android:text="--%"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/battery_bg"
-                    android:padding="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
+            <include
+                layout="@layout/view_top_bar" />
 
             <!-- TIME -->
             <TextView

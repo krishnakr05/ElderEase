@@ -24,6 +24,7 @@ import com.example.elderease.model.AppInfo
 import com.example.elderease.model.ContactInfo
 import com.example.elderease.ui.setup.SetupAppsActivity
 import android.util.Log
+import android.widget.TextView
 import com.example.elderease.ui.contacts.ContactsActivity
 
 class HomeActivity : AppCompatActivity() {
@@ -87,31 +88,11 @@ class HomeActivity : AppCompatActivity() {
         }
         findViewById<android.widget.Button>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
-        }/*
-        val appGrid: RecyclerView = findViewById(R.id.appGrid)
-        appGrid.layoutManager = GridLayoutManager(this, 2)
-
-        val packages = prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "")
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?: emptyList()
-        val selectedApps = loadSelectedApps(packages)
-        appGrid.adapter = AppGridAdapter(apps) { app ->
-            launchApp(app)
         }
-
-        val contactGrid: RecyclerView = findViewById(R.id.contactGrid)
-        contactGrid.layoutManager = GridLayoutManager(this, 2)
-
-        val contacts = loadSelectedContacts()
-        contactGrid.adapter = ContactGridAdapter(contacts) { contact ->
-            callContact(contact)
-        }
-        */
         findViewById<android.widget.Button>(R.id.btnContacts).setOnClickListener {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
+        findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
 
 
     }
