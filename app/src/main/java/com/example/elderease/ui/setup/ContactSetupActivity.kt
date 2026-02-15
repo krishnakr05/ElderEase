@@ -27,7 +27,7 @@ class ContactSetupActivity : ComponentActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.contactList)
         val saveButton = findViewById<Button>(R.id.saveButton)
 
-        adapter = ContactAdapter(contacts)
+        adapter = ContactAdapter(contacts, this)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 

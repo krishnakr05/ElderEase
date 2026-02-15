@@ -62,4 +62,17 @@ object ContactRepository {
 
         return result
     }
+    fun saveSelectedContacts(context: Context, contacts: List<ContactInfo>) {
+        val prefs = context.getSharedPreferences(
+            SetupAppsActivity.PREFS_NAME,
+            Context.MODE_PRIVATE
+        )
+
+        val ids = contacts.filter { it.isSelected }.joinToString(",") { it.id }
+
+        prefs.edit()
+            .putString("selected_contact_ids", ids)
+            .apply()
+    }
+
 }
