@@ -1,57 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
-
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="ElderEase"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ElderEase">
 
+        <!-- HOME / LAUNCHER -->
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
         </activity>
 
-        <activity
-            android:name=".ui.setup.SetupAppsActivity"
-            android:exported="false" />
-
+        <!-- EMERGENCY -->
+        <activity android:name=".ui.emergency.EmergencyActivity"/>
         <activity
             android:name=".ui.setup.ContactSetupActivity"
             android:exported="false"/>
 
-        <!-- EMERGENCY SCREEN -->
-        <activity
-            android:name=".ui.emergency.EmergencyActivity"
-            android:exported="false" />
+        <!-- VOICE -->
+        <activity android:name=".ui.voice.VoiceHelpActivity"/>
 
-        <!-- VOICE HELP SCREEN -->
-        <activity
-            android:name=".ui.voice.VoiceHelpActivity"
-            android:exported="false" />
+        <!-- SETTINGS -->
+        <activity android:name=".ui.settings.SettingsActivity"/>
 
-        <activity
-            android:name=".ui.contacts.ContactsActivity"
-            android:exported="false" />
+        <!-- CONTACTS -->
+        <activity android:name=".ui.contacts.ContactsActivity"/>
 
-        <!-- SETTINGS SCREEN -->
-        <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:exported="false" />
+        <!-- SETUP -->
+        <activity android:name=".ui.setup.SetupAppsActivity"/>
+
+        <!-- ALL APPS -->
+        <activity android:name=".ui.allapps.AllAppsActivity"/>
 
     </application>
-
-
 
 </manifest>
