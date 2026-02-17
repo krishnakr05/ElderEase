@@ -1,4 +1,4 @@
-package com.example.elderease
+package com.example.elderease.ui.emergency
 
 import android.content.Context
 
