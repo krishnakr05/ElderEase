@@ -39,6 +39,11 @@
 
         </activity>
 
+        <!-- HOME -->
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="true" />
+
         <!-- EMERGENCY -->
         <activity android:name=".ui.emergency.EmergencyActivity"/>
         <activity
