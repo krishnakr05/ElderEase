@@ -2,7 +2,6 @@ package com.example.elderease.ui.allapps
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,9 +16,6 @@ class AllAppsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_all_apps)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerAllApps)
-        val btnBackHome = findViewById<Button>(R.id.btnBackHome)
-        val btnHomeBottom = findViewById<Button>(R.id.btnHomeBottom)
-
         recyclerView.layoutManager = GridLayoutManager(this, 3)
 
         val apps = loadAllApps()
@@ -27,16 +23,6 @@ class AllAppsActivity : AppCompatActivity() {
         recyclerView.adapter = AppAdapter(apps) { app ->
             app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(app.launchIntent)
-        }
-
-        // Top right Home button
-        btnBackHome.setOnClickListener {
-            finish()
-        }
-
-        // Bottom Home button
-        btnHomeBottom.setOnClickListener {
-            finish()
         }
     }
 
@@ -47,15 +33,12 @@ class AllAppsActivity : AppCompatActivity() {
 
         val resolveInfos = pm.queryIntentActivities(intent, 0)
 
-        val apps = resolveInfos.mapNotNull {
-
-            val launchIntent = pm.getLaunchIntentForPackage(it.activityInfo.packageName)
-                ?: return@mapNotNull null   // prevents crash
-
+        val apps = resolveInfos.map {
             val label = it.loadLabel(pm).toString()
             val icon = it.loadIcon(pm)
+            val launchIntent = pm.getLaunchIntentForPackage(it.activityInfo.packageName)
 
-            AppInfo(label, icon, launchIntent)
+            AppInfo(label, icon, launchIntent!!)
         }
 
         return apps.sortedBy { it.label.lowercase() }
