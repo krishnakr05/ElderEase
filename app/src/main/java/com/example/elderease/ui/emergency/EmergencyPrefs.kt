@@ -15,8 +15,8 @@ class EmergencyPrefs(context: Context) {
     }
 
     fun getEmergencyNumbers(): List<String> {
-        val num1 = prefs.getString("emergency1", "9656098358") ?: ""
-        val num2 = prefs.getString("emergency2", "9400692991") ?: ""
+        val num1 = prefs.getString("emergency1", "9400692991") ?: ""
+        val num2 = prefs.getString("emergency2", "9656098358") ?: ""
         val num3 = prefs.getString("emergency3", "8714199288") ?: ""
 
         return listOf(num1, num2, num3)
