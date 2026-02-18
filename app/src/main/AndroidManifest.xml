@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    package="com.example.elderease">
 
     <application
         android:allowBackup="true"
@@ -8,10 +8,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ElderEase">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
+        <!-- Launcher: Caregiver Login -->
         <activity
-            android:name=".ui.home.HomeActivity"
+            android:name=".ui.caregiver.CaregiverLoginActivity"
             android:exported="true">
 
             <intent-filter>
@@ -21,8 +22,21 @@
 
         </activity>
 
+        <!-- Main Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- Home Screen -->
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+
+        <!-- Caregiver Settings -->
+        <activity
+            android:name=".ui.caregiver.CaregiverSettingsActivity"
+            android:exported="false" />
+
     </application>
-
-
 
 </manifest>

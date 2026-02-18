@@ -1,5 +1,6 @@
 package com.example.elderease.ui.caregiver
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -12,54 +13,118 @@ class CaregiverSettingsActivity : AppCompatActivity() {
 
     private lateinit var prefs: CaregiverPrefs
 
+    private lateinit var etNewPin: EditText
+    private lateinit var etConfirmPin: EditText
+
+    private lateinit var btnSavePin: Button
+    private lateinit var btnSaveSettings: Button
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_caregiver_settings)
 
-        // Initialize SharedPreferences helper
+        // Initialize preferences
         prefs = CaregiverPrefs(this)
 
-        // Get UI elements
-        val etNewPin = findViewById<EditText>(R.id.etNewPin)
-        val btnSavePin = findViewById<Button>(R.id.btnSavePin)
-        val btnSaveSettings = findViewById<Button>(R.id.btnSaveSettings)
+        // 🔐 Block unauthorized access (Task 4)
+        if (!intent.getBooleanExtra("AUTH_OK", false)) {
 
-        // Save PIN button
+            val loginIntent = Intent(this, CaregiverLoginActivity::class.java)
+
+            startActivity(loginIntent)
+
+            finish()
+
+            return
+        }
+
+        // Bind UI
+        etNewPin = findViewById(R.id.etNewPin)
+        etConfirmPin = findViewById(R.id.etConfirmPin)
+
+        btnSavePin = findViewById(R.id.btnSavePin)
+        btnSaveSettings = findViewById(R.id.btnSaveSettings)
+
+
+        // Change PIN button
         btnSavePin.setOnClickListener {
 
-            val newPin = etNewPin.text.toString().trim()
+            changePin()
+        }
 
-            if (newPin.length >= 4) {
+
+        // Save other settings (future use)
+        btnSaveSettings.setOnClickListener {
+
+            showToast("Settings saved successfully")
+        }
+    }
+
+
+    // Handle PIN change logic
+    private fun changePin() {
+
+        val newPin = etNewPin.text.toString().trim()
+        val confirmPin = etConfirmPin.text.toString().trim()
+
+        when {
+
+            newPin.isEmpty() || confirmPin.isEmpty() -> {
+                showToast("Please enter PIN in both fields")
+            }
+
+            newPin.length < 4 -> {
+                showToast("PIN must be at least 4 digits")
+            }
+
+            newPin != confirmPin -> {
+                showToast("PINs do not match")
+            }
+
+            isWeakPin(newPin) -> {
+                showToast("Choose a stronger PIN")
+            }
+
+            else -> {
 
                 prefs.savePin(newPin)
 
-                Toast.makeText(
-                    this,
-                    "PIN saved successfully",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast("PIN changed successfully")
 
-                etNewPin.text.clear()
-
-            } else {
-
-                Toast.makeText(
-                    this,
-                    "PIN must be at least 4 digits",
-                    Toast.LENGTH_SHORT
-                ).show()
+                clearFields()
             }
         }
+    }
 
-        // Save other settings (for future use)
-        btnSaveSettings.setOnClickListener {
 
-            Toast.makeText(
-                this,
-                "Settings saved",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+    // Check weak PINs
+    private fun isWeakPin(pin: String): Boolean {
+
+        val weakPins = listOf(
+            "1234",
+            "0000",
+            "1111",
+            "2222",
+            "1212"
+        )
+
+        return weakPins.contains(pin)
+    }
+
+
+    // Clear input fields
+    private fun clearFields() {
+
+        etNewPin.text.clear()
+        etConfirmPin.text.clear()
+    }
+
+
+    // Toast helper
+    private fun showToast(msg: String) {
+
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 }
