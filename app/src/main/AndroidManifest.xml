@@ -26,8 +26,8 @@
 
             <!-- Normal app launch (for testing) -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <!-- Launcher capability -->
@@ -53,6 +53,15 @@
         <!-- VOICE -->
         <activity android:name=".ui.voice.VoiceHelpActivity"/>
 
+        <!-- CAREGIVER  -->
+        <activity
+            android:name=".ui.caregiver.CaregiverLoginActivity"
+            android:exported="false" />
+        <!-- Caregiver Settings -->
+        <activity
+            android:name=".ui.caregiver.CaregiverSettingsActivity"
+            android:exported="false" />
+
         <!-- SETTINGS -->
         <activity android:name=".ui.settings.SettingsActivity"/>
 
@@ -66,5 +75,7 @@
         <activity android:name=".ui.allapps.AllAppsActivity"/>
 
     </application>
+
+
 
 </manifest>

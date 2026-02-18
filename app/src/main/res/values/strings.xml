@@ -1,7 +1,11 @@
 <resources>
+
+    <string name="app_name">ElderEase</string>
+
     <string name="caregiver_settings">Caregiver Settings</string>
     <string name="new_pin">New PIN</string>
     <string name="save_pin">Save PIN</string>
     <string name="enable_emergency">Enable Emergency Feature</string>
     <string name="save_settings">Save Settings</string>
+
 </resources>
