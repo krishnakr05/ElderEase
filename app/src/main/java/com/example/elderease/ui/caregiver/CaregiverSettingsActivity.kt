@@ -25,22 +25,18 @@ class CaregiverSettingsActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_caregiver_settings)
 
-        // Initialize preferences
         prefs = CaregiverPrefs(this)
 
-        // 🔐 Block unauthorized access (Task 4)
+        // 🔐 Security Check
         if (!intent.getBooleanExtra("AUTH_OK", false)) {
 
             val loginIntent = Intent(this, CaregiverLoginActivity::class.java)
-
             startActivity(loginIntent)
 
             finish()
-
             return
         }
 
-        // Bind UI
         etNewPin = findViewById(R.id.etNewPin)
         etConfirmPin = findViewById(R.id.etConfirmPin)
 
@@ -48,22 +44,16 @@ class CaregiverSettingsActivity : AppCompatActivity() {
         btnSaveSettings = findViewById(R.id.btnSaveSettings)
 
 
-        // Change PIN button
         btnSavePin.setOnClickListener {
-
             changePin()
         }
 
-
-        // Save other settings (future use)
         btnSaveSettings.setOnClickListener {
-
             showToast("Settings saved successfully")
         }
     }
 
 
-    // Handle PIN change logic
     private fun changePin() {
 
         val newPin = etNewPin.text.toString().trim()
@@ -99,7 +89,6 @@ class CaregiverSettingsActivity : AppCompatActivity() {
     }
 
 
-    // Check weak PINs
     private fun isWeakPin(pin: String): Boolean {
 
         val weakPins = listOf(
@@ -114,7 +103,6 @@ class CaregiverSettingsActivity : AppCompatActivity() {
     }
 
 
-    // Clear input fields
     private fun clearFields() {
 
         etNewPin.text.clear()
@@ -122,7 +110,6 @@ class CaregiverSettingsActivity : AppCompatActivity() {
     }
 
 
-    // Toast helper
     private fun showToast(msg: String) {
 
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

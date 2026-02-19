@@ -7,16 +7,37 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
+
+    <!-- App Grid -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/appGrid"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="16dp"
+
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+
         app:spanCount="3"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"/>
+
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+
+        app:menu="@menu/bottom_menu"
+        app:itemTextAppearanceActive="@style/BottomNavBigText"
+        app:itemTextAppearanceInactive="@style/BottomNavBigText"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
