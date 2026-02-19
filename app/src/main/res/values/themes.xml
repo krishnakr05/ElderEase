@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ElderEase" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here if needed -->
+    <!-- Main App Theme -->
+    <style name="Theme.ElderEase"
+        parent="Theme.AppCompat.DayNight.NoActionBar">
+
+        <!-- You can add more theme items here later -->
+
+    </style>
+
+
+    <!-- Bigger Bottom Navigation Text -->
+    <style name="BottomNavBigText"
+        parent="TextAppearance.AppCompat.Medium">
+
+        <!-- Large readable text for elders -->
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+
     </style>
 
 </resources>
