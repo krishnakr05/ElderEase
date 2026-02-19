@@ -9,18 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.AppInfo
 
-/**
- * Simple grid adapter for the home screen.
- * It only binds already-prepared AppInfo data and forwards click events.
- */
-class AppGridAdapter(
+class AppAdapter(
     private val apps: List<AppInfo>,
-    private val onAppClicked: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppGridAdapter.AppViewHolder>() {
+    private val onClick: (AppInfo) -> Unit
+) : RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
 
-    class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val iconView: ImageView = itemView.findViewById(R.id.appIcon)
-        val labelView: TextView = itemView.findViewById(R.id.appLabel)
+    class AppViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val icon: ImageView = view.findViewById(R.id.appIcon)
+        val name: TextView = view.findViewById(R.id.appName)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
@@ -31,12 +27,11 @@ class AppGridAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val app = apps[position]
-
-        holder.iconView.setImageDrawable(app.icon)
-        holder.labelView.text = app.label
+        holder.name.text = app.label
+        holder.icon.setImageDrawable(app.icon)
 
         holder.itemView.setOnClickListener {
-            onAppClicked(app)
+            onClick(app)
         }
     }
 
