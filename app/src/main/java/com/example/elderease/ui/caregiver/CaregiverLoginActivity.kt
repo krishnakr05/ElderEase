@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
 import com.example.elderease.ui.home.HomeActivity
+import com.example.elderease.ui.settings.SettingsActivity
+import com.example.elderease.ui.setup.SetupAppsActivity
 
 class CaregiverLoginActivity : AppCompatActivity() {
 
@@ -19,6 +21,8 @@ class CaregiverLoginActivity : AppCompatActivity() {
     private lateinit var tvError: TextView
 
     private lateinit var prefs: SharedPreferences
+
+    private lateinit var mode: String
 
     private val MAX_ATTEMPTS = 3
     private var attemptsLeft = MAX_ATTEMPTS
@@ -30,13 +34,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
         prefs = getSharedPreferences("caregiver_prefs", MODE_PRIVATE)
 
         // If already verified, skip login
-        val isVerified = prefs.getBoolean("verified", false)
-
-        if (isVerified) {
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-            return
-        }
+        mode = intent.getStringExtra("MODE") ?: "VERIFY_PIN"
 
         setContentView(R.layout.activity_caregiver_login)
 
@@ -56,13 +54,11 @@ class CaregiverLoginActivity : AppCompatActivity() {
         val pin1 = etPin1.text.toString().trim()
         val pin2 = etPin2.text.toString().trim()
 
-        // Check empty
         if (pin1.isEmpty() || pin2.isEmpty()) {
             tvError.text = "Please enter PIN in both fields"
             return
         }
 
-        // Check match
         if (pin1 != pin2) {
             tvError.text = "PINs do not match"
             return
@@ -70,41 +66,44 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
         val savedPin = prefs.getString("pin", null)
 
-        // First time: set PIN
-        if (savedPin == null) {
+        // 🔹 SET PIN (first-time setup)
+        if (mode == "SET_PIN") {
+
+            if (savedPin != null) {
+                tvError.text = "PIN already set"
+                return
+            }
 
             prefs.edit()
                 .putString("pin", pin1)
-                .putBoolean("verified", true)
                 .apply()
 
-            Toast.makeText(this, "PIN set successfully", Toast.LENGTH_SHORT).show()
+            // ✅ mark setup complete HERE
+            val setupPrefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
+            setupPrefs.edit()
+                .putBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, true)
+                .apply()
 
-            goToHome()
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+            return
+        }
 
-        } else {
+        // 🔹 VERIFY PIN (Settings access)
+        if (mode == "VERIFY_PIN") {
 
-            // Verify existing PIN
+            if (savedPin == null) {
+                tvError.text = "No caregiver PIN set"
+                return
+            }
+
             if (pin1 == savedPin) {
-
-                prefs.edit()
-                    .putBoolean("verified", true)
-                    .apply()
-
-                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-
-                goToHome()
-
+                startActivity(Intent(this, SettingsActivity::class.java))
+                finish()
             } else {
-
                 attemptsLeft--
-
-                if (attemptsLeft > 0) {
-                    tvError.text = "Wrong PIN. Attempts left: $attemptsLeft"
-                } else {
-                    tvError.text = "Too many attempts. Try again later."
-                    btnSetPin.isEnabled = false
-                }
+                tvError.text = "Wrong PIN. Attempts left: $attemptsLeft"
+                if (attemptsLeft <= 0) btnSetPin.isEnabled = false
             }
         }
     }

@@ -14,6 +14,7 @@ import com.example.elderease.R
 import com.example.elderease.model.ContactInfo
 import com.example.elderease.ui.setup.SetupAppsActivity
 import android.content.Intent
+import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 
 class ContactSetupActivity : ComponentActivity() {
 
@@ -44,13 +45,11 @@ class ContactSetupActivity : ComponentActivity() {
                 .putBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, true)
                 .apply()
 
-            startActivity(
-                Intent(this, com.example.elderease.ui.home.HomeActivity::class.java)
-            )
+            val intent = Intent(this, CaregiverLoginActivity::class.java)
+            intent.putExtra("MODE", "SET_PIN")
+            startActivity(intent)
             finish()
         }
-
-
     }
 
     private fun checkPermissionAndLoad() {

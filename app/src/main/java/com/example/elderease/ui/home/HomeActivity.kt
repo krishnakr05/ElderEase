@@ -26,6 +26,7 @@ import android.widget.Button
 import android.widget.TextView
 import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.allapps.AllAppsActivity
+import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 
 class HomeActivity : AppCompatActivity() {
 
@@ -87,7 +88,9 @@ class HomeActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            val intent = Intent(this, CaregiverLoginActivity::class.java)
+            intent.putExtra("MODE", "VERIFY_PIN")
+            startActivity(intent)
         }
 
         findViewById<Button>(R.id.btnContacts).setOnClickListener {
