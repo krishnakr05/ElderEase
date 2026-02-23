@@ -26,30 +26,20 @@ class ContactAdapter(
             .inflate(R.layout.item_contact, parent, false)
         return ViewHolder(view)
     }
-/*
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val contact = contacts[position]
-        holder.name.text = contact.name
-        holder.checkBox.isChecked = contact.isSelected
 
-        holder.checkBox.setOnCheckedChangeListener { _, checked ->
-            contact.isSelected = checked
-        }
-    }*/
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val contact = contacts[position]
 
         holder.name.text = contact.name
 
-        // 🔹 VERY IMPORTANT: remove old listener
-        //holder.checkBox.setOnCheckedChangeListener(null)
+        // 🔹remove old listener
         holder.checkBox.setOnCheckedChangeListener { _, checked ->
             contact.isSelected = checked
             ContactRepository.saveSelectedContacts(context, contacts)
         }
 
 
-    // 🔹 bind UI to data
+        // 🔹 bind UI to data
         holder.checkBox.isChecked = contact.isSelected
 
         // 🔹 update data from UI
