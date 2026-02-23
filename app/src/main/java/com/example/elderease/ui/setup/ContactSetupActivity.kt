@@ -46,7 +46,7 @@ class ContactSetupActivity : ComponentActivity() {
                 .apply()
 
             val intent = Intent(this, CaregiverLoginActivity::class.java)
-            intent.putExtra("MODE", "SET_PIN")
+            intent.putExtra("MODE", CaregiverLoginActivity.MODE_SET)
             startActivity(intent)
             finish()
         }

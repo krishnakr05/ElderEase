@@ -89,7 +89,7 @@ class HomeActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             val intent = Intent(this, CaregiverLoginActivity::class.java)
-            intent.putExtra("MODE", "VERIFY_PIN")
+            intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
             startActivity(intent)
         }
 
