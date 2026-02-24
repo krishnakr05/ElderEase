@@ -9,10 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.AppInfo
 
-class AppAdapter(
+class HomeAppAdapter(
     private val apps: List<AppInfo>,
     private val onClick: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<HomeAppAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -21,8 +21,7 @@ class AppAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val app = apps[position]
-        holder.bind(app)
+        holder.bind(apps[position])
     }
 
     override fun getItemCount() = apps.size
@@ -31,11 +30,7 @@ class AppAdapter(
         fun bind(app: AppInfo) {
             itemView.findViewById<TextView>(R.id.appName).text = app.label
             itemView.findViewById<ImageView>(R.id.appIcon).setImageDrawable(app.icon)
-
-            itemView.setOnClickListener {
-                onClick(app)
-            }
+            itemView.setOnClickListener { onClick(app) }
         }
     }
 }
-
