@@ -1,42 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.elderease">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <!-- Declare telephony is optional -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <!-- Emergency permissions -->
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="ElderEase"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.ElderEase">
 
-        <!-- Launcher: Caregiver Login -->
+        <!-- HOME / LAUNCHER -->
         <activity
-            android:name=".ui.caregiver.CaregiverLoginActivity"
+            android:name=".MainActivity"
             android:exported="true">
 
+            <!-- Normal app launch (for testing) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Launcher capability -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
         </activity>
 
-        <!-- Main Activity -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
-        <!-- Home Screen -->
+        <!-- HOME -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="false" />
+            android:exported="true" />
 
+        <!-- EMERGENCY -->
+        <activity android:name=".ui.emergency.EmergencyActivity"/>
+        <activity
+            android:name=".ui.setup.ContactSetupActivity"
+            android:exported="false"/>
+
+        <!-- VOICE -->
+        <activity android:name=".ui.voice.VoiceHelpActivity"/>
+
+        <!-- CAREGIVER  -->
+        <activity
+            android:name=".ui.caregiver.CaregiverLoginActivity"
+            android:exported="false" />
         <!-- Caregiver Settings -->
         <activity
             android:name=".ui.caregiver.CaregiverSettingsActivity"
             android:exported="false" />
 
+        <!-- SETTINGS -->
+        <activity android:name=".ui.settings.SettingsActivity"/>
+
+        <!-- CONTACTS -->
+        <activity android:name=".ui.contacts.ContactsActivity"/>
+
+        <!-- SETUP -->
+        <activity android:name=".ui.setup.SetupAppsActivity"/>
+
+        <!-- ALL APPS -->
+        <activity android:name=".ui.allapps.AllAppsActivity"/>
+
     </application>
+
+
 
 </manifest>

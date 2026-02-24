@@ -10,30 +10,52 @@ import com.example.elderease.R
 import com.example.elderease.model.AppInfo
 
 class AppAdapter(
-    private val apps: List<AppInfo>,
+    private val allApps: List<AppInfo>,
     private val onClick: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
+) : RecyclerView.Adapter<AppAdapter.ViewHolder>() {
 
-    class AppViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val icon: ImageView = view.findViewById(R.id.appIcon)
-        val name: TextView = view.findViewById(R.id.appName)
+    private val filteredApps = mutableListOf<AppInfo>()
+
+    init {
+        filteredApps.addAll(allApps)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
+    fun filter(query: String) {
+        filteredApps.clear()
+        if (query.isBlank()) {
+            filteredApps.addAll(allApps)
+        } else {
+            filteredApps.addAll(
+                allApps.filter {
+                    it.label.contains(query, ignoreCase = true)
+                }
+            )
+        }
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_app, parent, false)
-        return AppViewHolder(view)
+        return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
-        val app = apps[position]
-        holder.name.text = app.label
-        holder.icon.setImageDrawable(app.icon)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val app = filteredApps[position]
+        holder.bind(app)
+    }
 
-        holder.itemView.setOnClickListener {
-            onClick(app)
+    override fun getItemCount() = filteredApps.size
+
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(app: AppInfo) {
+            itemView.findViewById<TextView>(R.id.appName).text = app.label
+            itemView.findViewById<ImageView>(R.id.appIcon).setImageDrawable(app.icon)
+
+            itemView.setOnClickListener {
+                onClick(app)
+            }
         }
     }
-
-    override fun getItemCount(): Int = apps.size
 }
+

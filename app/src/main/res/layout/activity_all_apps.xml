@@ -3,73 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F7F7F7">
+    android:background="#F4F4F4"
+    android:padding="15dp">
 
-    <!-- TOP BAR -->
-    <RelativeLayout
+    <TextView
+        android:text="All Apps"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <SearchView
+        android:id="@+id/searchApps"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:padding="10dp">
+        android:layout_height="wrap_content"
+        android:queryHint="Search apps"
+        android:iconifiedByDefault="false"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="All Apps"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_centerVertical="true"/>
-
-        <!-- RETURN BUTTON -->
-        <Button
-            android:id="@+id/btnBackHome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:padding="8dp"/>
-    </RelativeLayout>
-
-    <!-- APPS GRID -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerAllApps"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="10dp"/>
-
-    <!-- LARGE BOTTOM SAFETY BOX -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="#FFF1F1"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="15dp"
-        android:elevation="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="You are viewing all apps.\nTap below to return home."
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:gravity="center"/>
-
-        <Button
-            android:id="@+id/btnHomeBottom"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:text="Go to Home"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="#FF6B6B"
-            android:textColor="#FFFFFF"/>
-
-    </LinearLayout>
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

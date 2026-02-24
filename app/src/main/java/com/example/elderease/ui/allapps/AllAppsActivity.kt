@@ -2,7 +2,8 @@ package com.example.elderease.ui.allapps
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,47 +18,76 @@ class AllAppsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_all_apps)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerAllApps)
-        val btnBackHome = findViewById<Button>(R.id.btnBackHome)
-        val btnHomeBottom = findViewById<Button>(R.id.btnHomeBottom)
+        val searchView = findViewById<SearchView>(R.id.searchApps)
 
         recyclerView.layoutManager = GridLayoutManager(this, 3)
 
         val apps = loadAllApps()
-
-        recyclerView.adapter = AppAdapter(apps) { app ->
+        val adapter = AppAdapter(apps) { app ->
             app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(app.launchIntent)
         }
 
-        // Top right Home button
-        btnBackHome.setOnClickListener {
-            finish()
+        recyclerView.adapter = adapter
+
+        /* 🔍 SEARCH LISTENER */
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                adapter.filter(query ?: "")
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter(newText ?: "")
+                return true
+            }
+        })
+
+        /* ❌ CLEAR BUTTON */
+        searchView.setOnCloseListener {
+            searchView.setQuery("", false)
+            adapter.filter("")
+            false
         }
 
-        // Bottom Home button
-        btnHomeBottom.setOnClickListener {
-            finish()
+        /* 🎤 DUMMY VOICE BUTTON (placeholder) */
+        val voiceIconId = searchView.context.resources
+            .getIdentifier("android:id/search_voice_btn", null, null)
+
+        val voiceButton = searchView.findViewById<android.view.View>(voiceIconId)
+        voiceButton?.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Voice search coming soon",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
     private fun loadAllApps(): List<AppInfo> {
         val pm = packageManager
-        val intent = Intent(Intent.ACTION_MAIN, null)
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val intent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
 
         val resolveInfos = pm.queryIntentActivities(intent, 0)
 
-        val apps = resolveInfos.mapNotNull {
+        val apps = resolveInfos.mapNotNull { resolveInfo ->
+            val launchIntent =
+                pm.getLaunchIntentForPackage(resolveInfo.activityInfo.packageName)
 
-            val launchIntent = pm.getLaunchIntentForPackage(it.activityInfo.packageName)
-                ?: return@mapNotNull null   // prevents crash
-
-            val label = it.loadLabel(pm).toString()
-            val icon = it.loadIcon(pm)
-
-            AppInfo(label, icon, launchIntent)
+            launchIntent?.let {
+                AppInfo(
+                    label = resolveInfo.loadLabel(pm).toString(),
+                    icon = resolveInfo.loadIcon(pm),
+                    launchIntent = launchIntent
+                )
+            }
         }
 
         return apps.sortedBy { it.label.lowercase() }
     }
+
 }
+
+
