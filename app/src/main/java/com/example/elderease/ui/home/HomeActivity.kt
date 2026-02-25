@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.AppInfo
+import com.example.elderease.ui.home.AppAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity() {
@@ -20,7 +21,7 @@ class HomeActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         val apps = loadLaunchableApps()
-        recyclerView.adapter = AppGridAdapter(apps) { app ->
+        recyclerView.adapter = AppAdapter(apps) { app ->
             launchApp(app)
         }
 

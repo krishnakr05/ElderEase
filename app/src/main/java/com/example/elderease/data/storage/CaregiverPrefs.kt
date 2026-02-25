@@ -7,21 +7,41 @@ import androidx.security.crypto.MasterKey
 
 class CaregiverPrefs(context: Context) {
 
-    private val securePrefs: SharedPreferences
+    private lateinit var securePrefs: SharedPreferences
 
     init {
 
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        try {
 
-        securePrefs = EncryptedSharedPreferences.create(
-            context,
-            "secure_caregiver_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            securePrefs = EncryptedSharedPreferences.create(
+                context,
+                "secure_caregiver_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+
+        } catch (e: Exception) {
+
+            // Delete corrupted encrypted file
+            context.deleteSharedPreferences("secure_caregiver_prefs")
+
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            securePrefs = EncryptedSharedPreferences.create(
+                context,
+                "secure_caregiver_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
     }
 
     // ---------------- PIN STORAGE ----------------

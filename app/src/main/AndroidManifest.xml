@@ -10,9 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <!-- Launcher: Caregiver Login -->
+        <!-- Launcher: Main Activity -->
         <activity
-            android:name=".ui.caregiver.CaregiverLoginActivity"
+            android:name=".MainActivity"
             android:exported="true">
 
             <intent-filter>
@@ -22,9 +22,9 @@
 
         </activity>
 
-        <!-- Main Activity -->
+        <!-- Caregiver Login -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.caregiver.CaregiverLoginActivity"
             android:exported="false" />
 
         <!-- Home Screen -->

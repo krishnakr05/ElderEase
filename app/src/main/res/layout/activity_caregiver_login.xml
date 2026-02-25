@@ -7,6 +7,7 @@
     android:padding="24dp"
     android:gravity="center">
 
+
     <!-- Title -->
     <TextView
         android:id="@+id/tvTitle"
@@ -17,6 +18,7 @@
         android:textStyle="bold"
         android:layout_marginBottom="24dp"/>
 
+
     <!-- Enter PIN -->
     <EditText
         android:id="@+id/etPin1"
@@ -26,6 +28,7 @@
         android:inputType="numberPassword"
         android:maxLength="6"
         android:textSize="18sp"/>
+
 
     <!-- Confirm PIN -->
     <EditText
@@ -38,6 +41,7 @@
         android:textSize="18sp"
         android:layout_marginTop="16dp"/>
 
+
     <!-- Action Button -->
     <Button
         android:id="@+id/btnSetPin"
@@ -47,6 +51,7 @@
         android:layout_marginTop="24dp"
         android:textSize="18sp"/>
 
+
     <!-- Error Message -->
     <TextView
         android:id="@+id/tvError"
@@ -55,5 +60,19 @@
         android:textColor="@color/error_red"
         android:layout_marginTop="12dp"
         android:textSize="14sp"/>
+
+
+    <!-- Forgot PIN -->
+    <TextView
+        android:id="@+id/tvForgotPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot PIN?"
+        android:textColor="@color/purple_500"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"/>
 
 </LinearLayout>
