@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
-    <!-- Declare telephony is optional -->
+    <!-- ================= PERMISSIONS ================= -->
+
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
-    <!-- Emergency permissions -->
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <!-- ================= APPLICATION ================= -->
 
     <application
         android:allowBackup="true"
@@ -19,22 +22,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ElderEase">
 
-        <!-- HOME / LAUNCHER -->
+        <!-- LAUNCHER -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
 
-            <!-- Normal app launch (for testing) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-
-            <!-- Launcher capability -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>
@@ -42,28 +37,42 @@
         <!-- HOME -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true" />
+            android:exported="true"/>
 
         <!-- EMERGENCY -->
-        <activity android:name=".ui.emergency.EmergencyActivity"/>
+        <activity
+            android:name=".ui.emergency.EmergencyActivity"
+            android:exported="false"/>
+
+        <!-- APPS SETUP -->
+        <activity
+            android:name=".ui.setup.SetupAppsActivity"
+            android:exported="false"/>
+
+        <!-- FAVOURITE CONTACT SETUP -->
+        <activity
+            android:name=".ui.setup.FavouriteContactSetupActivity"
+            android:exported="false"/>
+
+        <!-- SOS CONTACT SETUP -->
         <activity
             android:name=".ui.setup.ContactSetupActivity"
             android:exported="false"/>
 
-        <!-- VOICE -->
-        <activity android:name=".ui.voice.VoiceHelpActivity"/>
-
         <!-- SETTINGS -->
-        <activity android:name=".ui.settings.SettingsActivity"/>
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false"/>
 
-        <!-- CONTACTS -->
-        <activity android:name=".ui.contacts.ContactsActivity"/>
-
-        <!-- SETUP -->
-        <activity android:name=".ui.setup.SetupAppsActivity"/>
+        <!-- CONTACTS SCREEN -->
+        <activity
+            android:name=".ui.contacts.ContactsActivity"
+            android:exported="false"/>
 
         <!-- ALL APPS -->
-        <activity android:name=".ui.allapps.AllAppsActivity"/>
+        <activity
+            android:name=".ui.allapps.AllAppsActivity"
+            android:exported="false"/>
 
     </application>
 

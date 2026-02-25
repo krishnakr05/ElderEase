@@ -20,12 +20,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.example.elderease.model.AppInfo
 import com.example.elderease.model.ContactInfo
-import com.example.elderease.ui.setup.SetupAppsActivity
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.allapps.AllAppsActivity
+import com.example.elderease.ui.setup.SetupAppsActivity
 
 class HomeActivity : AppCompatActivity() {
 
@@ -36,16 +35,12 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
-        if (!prefs.getBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, false)) {
-            startActivity(Intent(this, SetupAppsActivity::class.java))
-            finish()
-            return
-        }
-
         setContentView(R.layout.activity_home)
 
-        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
+        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
+
+        val recyclerView =
+            findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.isNestedScrollingEnabled = false
 
@@ -56,9 +51,6 @@ class HomeActivity : AppCompatActivity() {
             ?: emptyList()
 
         val apps = loadSelectedApps(packages)
-
-        Log.d("HomeActivity", "Selected packages: $packages")
-        Log.d("HomeActivity", "Loaded apps count: ${apps.size}")
 
         recyclerView.adapter = AppAdapter(apps) { app ->
             launchApp(app)
@@ -78,9 +70,6 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
-        findViewById<android.widget.Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, com.example.elderease.ui.allapps.AllAppsActivity::class.java))
-        }
 
         findViewById<Button>(R.id.btnManual).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -94,7 +83,6 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
 
-        // ⭐ NEW FEATURE — VIEW ALL APPS
         findViewById<Button>(R.id.btnAllApps).setOnClickListener {
             startActivity(Intent(this, AllAppsActivity::class.java))
         }
@@ -107,8 +95,10 @@ class HomeActivity : AppCompatActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 val now = Date()
-                txtTime.text = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
-                txtDate.text = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
+                txtTime.text =
+                    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
+                txtDate.text =
+                    SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
                 handler.postDelayed(this, 1000)
             }
         }
@@ -118,7 +108,8 @@ class HomeActivity : AppCompatActivity() {
     private fun monitorBattery() {
         val batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                val level =
+                    intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
                 txtBattery.text = "$level%"
             }
         }
@@ -128,14 +119,22 @@ class HomeActivity : AppCompatActivity() {
     private fun loadSelectedApps(packageNames: List<String>): List<AppInfo> {
         val pm = packageManager
         val result = mutableListOf<AppInfo>()
+
         for (pkg in packageNames) {
             try {
                 val launchIntent = pm.getLaunchIntentForPackage(pkg) ?: continue
                 val appInfo = pm.getApplicationInfo(pkg, 0)
                 val label = pm.getApplicationLabel(appInfo).toString()
                 val icon = pm.getApplicationIcon(appInfo)
-                result.add(AppInfo(label = label, icon = icon, launchIntent = launchIntent))
-            } catch (e: PackageManager.NameNotFoundException) {
+
+                result.add(
+                    AppInfo(
+                        label = label,
+                        icon = icon,
+                        launchIntent = launchIntent
+                    )
+                )
+            } catch (_: PackageManager.NameNotFoundException) {
             }
         }
         return result

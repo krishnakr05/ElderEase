@@ -2,108 +2,56 @@ package com.example.elderease.ui.emergency
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
-import com.example.elderease.ui.emergency.EmergencyManager
-
 
 class EmergencyActivity : AppCompatActivity() {
 
-    private lateinit var btnCancel: Button
-    private lateinit var btnHelp: Button
-    private lateinit var btnBack: ImageView
-
-    private var timer: CountDownTimer? = null
-    private var secondsLeft = 5
-    private var countdownStarted = false
+    private lateinit var manager: EmergencyManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_emergency)
 
-        btnCancel = findViewById(R.id.btnCancel)
-        btnHelp = findViewById(R.id.btnHelp)
-        btnBack = findViewById(R.id.btnBack)
+        manager = EmergencyManager(this)
 
-        // Hide cancel button initially
-        btnCancel.visibility = View.INVISIBLE
-
-        // Back button → return to Home
-        btnBack.setOnClickListener {
-            finish()
-        }
-
-        // Start countdown ONLY when HELP is pressed
-        btnHelp.setOnClickListener {
-            if (!countdownStarted) {
-                startCountdown()
-                countdownStarted = true
-                btnCancel.visibility = View.VISIBLE
-            }
-        }
-
-        // Cancel button stops countdown
-        btnCancel.setOnClickListener {
-            timer?.cancel()
-            finish()
+        // 🔥 IMPORTANT: Your XML button id is btnHelp
+        findViewById<Button>(R.id.btnHelp).setOnClickListener {
+            checkPermissions()
         }
     }
 
-    private val PERMISSION_REQUEST_EMERGENCY = 200
+    private fun checkPermissions() {
 
-    private fun hasEmergencyPermissions(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CALL_PHONE
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
+        val callGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.CALL_PHONE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val smsGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.SEND_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!callGranted || !smsGranted) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.CALL_PHONE,
                     Manifest.permission.SEND_SMS
-                ) == PackageManager.PERMISSION_GRANTED
+                ),
+                200
+            )
+
+        } else {
+            manager.triggerSOS()
+        }
     }
 
-    private fun requestEmergencyPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.CALL_PHONE,
-                Manifest.permission.SEND_SMS
-            ),
-            PERMISSION_REQUEST_EMERGENCY
-        )
-    }
-
-
-    private fun startCountdown() {
-        secondsLeft = 5
-
-        timer = object : CountDownTimer(5000, 1000) {
-
-            override fun onTick(millisUntilFinished: Long) {
-                btnCancel.text = "CANCEL (${secondsLeft}s)"
-                secondsLeft--
-            }
-
-            override fun onFinish() {
-                btnCancel.text = "Calling..."
-
-                if (hasEmergencyPermissions()) {
-                    EmergencyManager(this@EmergencyActivity).triggerSOS()
-                    finish()
-                } else {
-                    requestEmergencyPermissions()
-                }
-            }
-
-        }.start()
-    }
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -111,12 +59,17 @@ class EmergencyActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == PERMISSION_REQUEST_EMERGENCY) {
-            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                EmergencyManager(this).triggerSOS()
-                finish()
-            }
+        if (requestCode == 200 &&
+            grantResults.isNotEmpty() &&
+            grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+        ) {
+            manager.triggerSOS()
+        } else {
+            Toast.makeText(
+                this,
+                "Permissions required for SOS",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
-
 }

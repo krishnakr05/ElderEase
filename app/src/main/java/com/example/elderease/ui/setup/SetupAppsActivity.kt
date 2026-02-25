@@ -1,23 +1,18 @@
 package com.example.elderease.ui.setup
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
-import com.example.elderease.ui.home.HomeActivity
 
-/**
- * First-time setup: user picks which apps appear on the home grid.
- * Saves selection to SharedPreferences and marks setup complete so HomeActivity shows only those apps.
- */
-class SetupAppsActivity : ComponentActivity() {
+class SetupAppsActivity : AppCompatActivity() {
 
     companion object {
         const val PREFS_NAME = "elderease_setup"
-        const val KEY_SETUP_COMPLETE = "is_setup_complete"
         const val KEY_SELECTED_PACKAGES = "selected_app_packages"
     }
 
@@ -33,49 +28,65 @@ class SetupAppsActivity : ComponentActivity() {
 
         items.clear()
         items.addAll(loadAllLaunchableApps())
-        adapter = SetupAppsAdapter(items) { /* selection changed, no op needed */ }
+
+        adapter = SetupAppsAdapter(items) { }
         list.adapter = adapter
 
-        findViewById<android.widget.Button>(R.id.setupContinue).setOnClickListener {
-            saveSelectionAndGoToContacts()
+        findViewById<Button>(R.id.setupContinue).setOnClickListener {
+            saveSelectionAndGoToFavouriteContacts()
         }
     }
 
-    /**
-     * Same source as HomeActivity (PackageManager LAUNCHER), but we keep package name and use SetupAppItem.
-     * Excludes this app so the launcher itself is not in the list.
-     */
     private fun loadAllLaunchableApps(): List<SetupAppItem> {
         val pm = packageManager
         val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }
+
         val resolveInfos = pm.queryIntentActivities(mainIntent, 0)
         val result = mutableListOf<SetupAppItem>()
+
         for (info in resolveInfos) {
             val pkg = info.activityInfo.packageName
             if (pkg == packageName) continue
-            val launchIntent = pm.getLaunchIntentForPackage(pkg) ?: continue
+
             val label = info.loadLabel(pm).toString()
             val icon = info.loadIcon(pm)
-            result.add(SetupAppItem(packageName = pkg, label = label, icon = icon, selected = false))
+
+            result.add(
+                SetupAppItem(
+                    packageName = pkg,
+                    label = label,
+                    icon = icon,
+                    selected = false
+                )
+            )
         }
+
         result.sortBy { it.label.lowercase() }
         return result
     }
 
-    /**
-     * Persist selected package names in list order (comma-separated), set setup complete, go to home.
-     */
-    private fun saveSelectionAndGoToContacts() {
+    private fun saveSelectionAndGoToFavouriteContacts() {
+
         val selected = items.filter { it.selected }.map { it.packageName }
 
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-            .putString(KEY_SELECTED_PACKAGES, selected.joinToString(","))
-            .apply()   // ❗ do NOT mark setup complete here
+        if (selected.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Please select at least one favourite app",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
 
-        val intent = Intent(this, ContactSetupActivity::class.java)
-        startActivity(intent)
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putString(KEY_SELECTED_PACKAGES, selected.joinToString(","))
+            .apply()
+
+        // 🔥 IMPORTANT → Move to Favourite Contact setup
+        startActivity(Intent(this, FavouriteContactSetupActivity::class.java))
         finish()
     }
 }
