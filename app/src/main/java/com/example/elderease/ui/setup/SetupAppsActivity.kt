@@ -16,7 +16,7 @@ import com.example.elderease.ui.home.HomeActivity
 class SetupAppsActivity : ComponentActivity() {
 
     companion object {
-        const val PREFS_NAME = "elderease_setup"
+        const val PREFS_NAME = "favorite_apps"
         const val KEY_SETUP_COMPLETE = "is_setup_complete"
         const val KEY_SELECTED_PACKAGES = "selected_app_packages"
     }

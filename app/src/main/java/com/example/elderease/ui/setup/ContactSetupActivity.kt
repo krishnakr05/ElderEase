@@ -16,6 +16,7 @@ import com.example.elderease.ui.setup.SetupAppsActivity
 import android.content.Intent
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import android.widget.Toast
+import com.example.elderease.data.storage.SetupState
 
 
 class ContactSetupActivity : ComponentActivity() {
@@ -48,6 +49,7 @@ class ContactSetupActivity : ComponentActivity() {
     // -------------------- SAVE LOGIC --------------------
 
     private fun saveContacts() {
+
         val selected = contacts.filter { it.isSelected }
 
         if (selected.isEmpty()) {
@@ -59,30 +61,44 @@ class ContactSetupActivity : ComponentActivity() {
             return
         }
 
+        // Save selected contacts
         val selectedIds = selected.map { it.id }
 
-        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
+        val prefs =
+            getSharedPreferences(
+                "favorite_contacts",
+                MODE_PRIVATE
+            )
+
         prefs.edit()
-            .putString("selected_contact_ids", selectedIds.joinToString(","))
+            .putString(
+                "selected_contact_ids",
+                selectedIds.joinToString(",")
+            )
             .apply()
 
+        // EDIT MODE → just exit
         if (mode == "EDIT") {
             Toast.makeText(
                 this,
                 "Favorite contacts updated",
                 Toast.LENGTH_SHORT
             ).show()
-            finish() // 🔙 back to Settings
+            finish()
             return
         }
 
-        // SETUP flow only
-        prefs.edit()
-            .putBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, true)
-            .apply()
+        // SETUP MODE → mark contacts done
+        SetupState(this).markContactsDone()
 
-        val intent = Intent(this, CaregiverLoginActivity::class.java)
-        intent.putExtra("MODE", CaregiverLoginActivity.MODE_SET)
+        // Go to SET PIN
+        val intent =
+            Intent(this, CaregiverLoginActivity::class.java)
+                .putExtra(
+                    "MODE",
+                    CaregiverLoginActivity.MODE_SET
+                )
+
         startActivity(intent)
         finish()
     }
@@ -163,16 +179,21 @@ class ContactSetupActivity : ComponentActivity() {
     // -------------------- PRELOAD --------------------
 
     private fun preloadSelectedContacts() {
-        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
+
+        val prefs =
+            getSharedPreferences(
+                "favorite_contacts",
+                MODE_PRIVATE
+            )
+
         val savedIds =
             prefs.getString("selected_contact_ids", "")
                 ?.split(",")
-                ?.toSet() ?: emptySet()
+                ?.toSet()
+                ?: emptySet()
 
         contacts.forEach { contact ->
-            if (savedIds.contains(contact.id)) {
-                contact.isSelected = true
-            }
+            contact.isSelected = savedIds.contains(contact.id)
         }
     }
 }

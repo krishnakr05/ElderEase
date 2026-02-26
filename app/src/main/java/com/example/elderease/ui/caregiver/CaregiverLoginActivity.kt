@@ -46,7 +46,13 @@ class CaregiverLoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_caregiver_login)
 
         caregiverPrefs = CaregiverPrefs(this)
-        mode = intent.getStringExtra("MODE") ?: MODE_VERIFY
+
+        val pinExists = caregiverPrefs.isPinSet()
+
+        mode = when {
+            !pinExists -> MODE_SET
+            else -> MODE_VERIFY
+        }
 
         tvTitle = findViewById(R.id.tvTitle)
         tvError = findViewById(R.id.tvError)
@@ -105,10 +111,6 @@ class CaregiverLoginActivity : AppCompatActivity() {
         when (mode) {
 
             MODE_SET -> {
-                if (savedPin != null) {
-                    tvError.text = "PIN already set"
-                    return
-                }
 
                 if (pin1 != pin2) {
                     tvError.text = "PINs do not match"
