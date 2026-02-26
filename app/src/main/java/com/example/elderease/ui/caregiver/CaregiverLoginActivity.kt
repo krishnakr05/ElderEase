@@ -47,12 +47,8 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
         caregiverPrefs = CaregiverPrefs(this)
 
-        val pinExists = caregiverPrefs.isPinSet()
-
-        mode = when {
-            !pinExists -> MODE_SET
-            else -> MODE_VERIFY
-        }
+        mode = intent.getStringExtra("MODE")
+            ?: if (caregiverPrefs.isPinSet()) MODE_VERIFY else MODE_SET
 
         tvTitle = findViewById(R.id.tvTitle)
         tvError = findViewById(R.id.tvError)
@@ -119,17 +115,6 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
                 caregiverPrefs.savePin(pin1)
                 SetupState(this).markPinDone()
-
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
-
-                // Mark setup complete
-                getSharedPreferences(
-                    SetupAppsActivity.PREFS_NAME,
-                    MODE_PRIVATE
-                ).edit()
-                    .putBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, true)
-                    .apply()
 
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()

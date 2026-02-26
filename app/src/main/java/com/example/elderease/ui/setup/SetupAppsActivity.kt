@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
+import com.example.elderease.data.storage.SetupState
 import com.example.elderease.ui.home.HomeActivity
 
 /**
@@ -17,7 +18,7 @@ class SetupAppsActivity : ComponentActivity() {
 
     companion object {
         const val PREFS_NAME = "favorite_apps"
-        const val KEY_SETUP_COMPLETE = "is_setup_complete"
+        //const val KEY_SETUP_COMPLETE = "is_setup_complete"
         const val KEY_SELECTED_PACKAGES = "selected_app_packages"
     }
 
@@ -117,6 +118,8 @@ class SetupAppsActivity : ComponentActivity() {
             finish()   // go back to Settings
             return
         }
+
+        SetupState(this).markAppsDone()
 
         // ✅ first-time setup flow
         startActivity(Intent(this, ContactSetupActivity::class.java))
