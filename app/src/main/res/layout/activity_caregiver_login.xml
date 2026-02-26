@@ -56,4 +56,15 @@
         android:layout_marginTop="12dp"
         android:textSize="14sp"/>
 
+    <!-- 🔐 FORGOT PIN (LONG PRESS) -->
+    <TextView
+        android:id="@+id/tvForgotPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot PIN? (long press)"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
 </LinearLayout>

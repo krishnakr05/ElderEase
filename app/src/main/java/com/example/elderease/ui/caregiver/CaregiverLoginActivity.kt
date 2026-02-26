@@ -1,15 +1,20 @@
 package com.example.elderease.ui.caregiver
 
+import android.app.KeyguardManager
 import android.content.Intent
-import android.content.SharedPreferences
+import android.media.MediaCodec.MetricsConstants.MODE
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.elderease.MainActivity
 import com.example.elderease.R
+import com.example.elderease.data.storage.CaregiverPrefs
+import com.example.elderease.data.storage.SetupState
 import com.example.elderease.ui.home.HomeActivity
 import com.example.elderease.ui.settings.SettingsActivity
 import com.example.elderease.ui.setup.SetupAppsActivity
@@ -19,13 +24,15 @@ class CaregiverLoginActivity : AppCompatActivity() {
     companion object {
         const val MODE_SET = "SET_PIN"
         const val MODE_VERIFY = "VERIFY_PIN"
+        private const val REQUEST_DEVICE_AUTH = 1001
     }
 
-    private lateinit var prefs: SharedPreferences
+    private lateinit var caregiverPrefs: CaregiverPrefs
     private lateinit var mode: String
 
     private lateinit var tvTitle: TextView
     private lateinit var tvError: TextView
+    private lateinit var tvForgotPin: TextView
     private lateinit var etPin1: EditText
     private lateinit var etPin2: EditText
     private lateinit var btnAction: Button
@@ -34,26 +41,28 @@ class CaregiverLoginActivity : AppCompatActivity() {
     private var attemptsLeft = MAX_ATTEMPTS
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_caregiver_login)
 
-        // SharedPreferences
-        prefs = getSharedPreferences("caregiver_prefs", MODE_PRIVATE)
-
-        // Read mode ONCE
+        caregiverPrefs = CaregiverPrefs(this)
         mode = intent.getStringExtra("MODE") ?: MODE_VERIFY
 
-        // Bind views
         tvTitle = findViewById(R.id.tvTitle)
         tvError = findViewById(R.id.tvError)
+        tvForgotPin = findViewById(R.id.tvForgotPin)
         etPin1 = findViewById(R.id.etPin1)
         etPin2 = findViewById(R.id.etPin2)
         btnAction = findViewById(R.id.btnSetPin)
 
         updateUIForMode()
 
-        btnAction.setOnClickListener {
-            handlePin()
+        btnAction.setOnClickListener { handlePin() }
+
+        // 🔐 Forgot PIN (long press)
+        tvForgotPin.setOnLongClickListener {
+            startDeviceAuth()
+            true
         }
     }
 
@@ -66,6 +75,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
                 etPin2.hint = "Confirm new PIN"
                 etPin2.visibility = View.VISIBLE
                 btnAction.text = "Set PIN"
+                tvForgotPin.visibility = View.GONE
             }
 
             MODE_VERIFY -> {
@@ -73,9 +83,12 @@ class CaregiverLoginActivity : AppCompatActivity() {
                 etPin1.hint = "Enter PIN"
                 etPin2.visibility = View.GONE
                 btnAction.text = "Verify"
+                tvForgotPin.visibility = View.VISIBLE
             }
         }
     }
+
+    // ---------------- PIN HANDLING ----------------
 
     private fun handlePin() {
 
@@ -87,12 +100,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
             return
         }
 
-        if (mode == MODE_SET && pin1 != pin2) {
-            tvError.text = "PINs do not match"
-            return
-        }
-
-        val savedPin = prefs.getString("pin", null)
+        val savedPin = caregiverPrefs.getPin()
 
         when (mode) {
 
@@ -102,16 +110,22 @@ class CaregiverLoginActivity : AppCompatActivity() {
                     return
                 }
 
-                prefs.edit()
-                    .putString("pin", pin1)
-                    .apply()
+                if (pin1 != pin2) {
+                    tvError.text = "PINs do not match"
+                    return
+                }
+
+                caregiverPrefs.savePin(pin1)
+                SetupState(this).markPinDone()
+
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
 
                 // Mark setup complete
-                val setupPrefs = getSharedPreferences(
+                getSharedPreferences(
                     SetupAppsActivity.PREFS_NAME,
                     MODE_PRIVATE
-                )
-                setupPrefs.edit()
+                ).edit()
                     .putBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, true)
                     .apply()
 
@@ -138,4 +152,69 @@ class CaregiverLoginActivity : AppCompatActivity() {
             }
         }
     }
+
+    // ---------------- FORGOT PIN ----------------
+
+    private fun startDeviceAuth() {
+        val keyguardManager =
+            getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+
+        if (!keyguardManager.isDeviceSecure) {
+            Toast.makeText(
+                this,
+                "Please enable device lock first",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        val intent =
+            keyguardManager.createConfirmDeviceCredentialIntent(
+                "Verify Caregiver",
+                "Confirm device lock to reset ElderEase"
+            )
+
+        startActivityForResult(intent, REQUEST_DEVICE_AUTH)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_DEVICE_AUTH && resultCode == RESULT_OK) {
+            showResetDialog()
+        }
+    }
+
+    private fun showResetDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Reset Caregiver Access")
+            .setMessage(
+                "This will reset caregiver PIN."
+            )
+            .setCancelable(false)
+            .setPositiveButton("Reset") { _, _ -> resetApp() }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    private fun resetApp() {
+        caregiverPrefs.clearPin()
+        caregiverPrefs.resetLock()
+
+        // 🚀 Go DIRECTLY to Set PIN
+        val intent =
+            Intent(this, CaregiverLoginActivity::class.java)
+                .putExtra(MODE, MODE_SET)
+
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        startActivity(intent)
+        finish()
+    }
+
 }
