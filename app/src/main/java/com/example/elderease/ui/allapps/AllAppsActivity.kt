@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.AppInfo
-
-class AllAppsActivity : AppCompatActivity() {
+import com.example.elderease.BaseActivity
+class AllAppsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

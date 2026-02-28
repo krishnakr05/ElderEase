@@ -2,7 +2,6 @@ package com.example.elderease.ui.caregiver
 
 import android.app.KeyguardManager
 import android.content.Intent
-import android.media.MediaCodec.MetricsConstants.MODE
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -10,16 +9,14 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import com.example.elderease.MainActivity
 import com.example.elderease.R
 import com.example.elderease.data.storage.CaregiverPrefs
 import com.example.elderease.data.storage.SetupState
 import com.example.elderease.ui.home.HomeActivity
 import com.example.elderease.ui.settings.SettingsActivity
-import com.example.elderease.ui.setup.SetupAppsActivity
+import com.example.elderease.BaseActivity
 
-class CaregiverLoginActivity : AppCompatActivity() {
+class CaregiverLoginActivity : BaseActivity() {
 
     companion object {
         const val MODE_SET = "SET_PIN"
@@ -41,7 +38,6 @@ class CaregiverLoginActivity : AppCompatActivity() {
     private var attemptsLeft = MAX_ATTEMPTS
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_caregiver_login)
 
@@ -59,12 +55,26 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
         updateUIForMode()
 
-        btnAction.setOnClickListener { handlePin() }
+        btnAction.setOnClickListener {
+            vibrate()
+            speak("Processing")
+            handlePin()
+        }
 
-        // 🔐 Forgot PIN (long press)
         tvForgotPin.setOnLongClickListener {
+            vibrate()
+            speak("Device authentication required")
             startDeviceAuth()
             true
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (mode == MODE_SET) {
+            speak("Set caregiver PIN")
+        } else {
+            speak("Verify caregiver PIN")
         }
     }
 
@@ -90,8 +100,6 @@ class CaregiverLoginActivity : AppCompatActivity() {
         }
     }
 
-    // ---------------- PIN HANDLING ----------------
-
     private fun handlePin() {
 
         val pin1 = etPin1.text.toString().trim()
@@ -99,6 +107,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
         if (pin1.isEmpty() || pin2.isEmpty()) {
             tvError.text = "Please enter PIN"
+            speak("Please enter PIN")
             return
         }
 
@@ -110,37 +119,48 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
                 if (pin1 != pin2) {
                     tvError.text = "PINs do not match"
+                    speak("PINs do not match")
                     return
                 }
 
                 caregiverPrefs.savePin(pin1)
                 SetupState(this).markPinDone()
 
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
+                speakAndRun("PIN set successfully") {
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    finish()
+                }
             }
 
             MODE_VERIFY -> {
+
                 if (savedPin == null) {
                     tvError.text = "No caregiver PIN set"
+                    speak("No caregiver PIN set")
                     return
                 }
 
                 if (pin1 == savedPin) {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    finish()
+
+                    speakAndRun("Access granted") {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                        finish()
+                    }
+
                 } else {
+
                     attemptsLeft--
                     tvError.text = "Wrong PIN. Attempts left: $attemptsLeft"
+                    speak("Wrong PIN")
+
                     if (attemptsLeft <= 0) {
                         btnAction.isEnabled = false
+                        speak("Too many attempts. Access locked")
                     }
                 }
             }
         }
     }
-
-    // ---------------- FORGOT PIN ----------------
 
     private fun startDeviceAuth() {
         val keyguardManager =
@@ -152,6 +172,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
                 "Please enable device lock first",
                 Toast.LENGTH_LONG
             ).show()
+            speak("Please enable device lock first")
             return
         }
 
@@ -172,6 +193,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_DEVICE_AUTH && resultCode == RESULT_OK) {
+            speak("Authentication successful")
             showResetDialog()
         }
     }
@@ -179,22 +201,25 @@ class CaregiverLoginActivity : AppCompatActivity() {
     private fun showResetDialog() {
         AlertDialog.Builder(this)
             .setTitle("Reset Caregiver Access")
-            .setMessage(
-                "This will reset caregiver PIN."
-            )
+            .setMessage("This will reset caregiver PIN.")
             .setCancelable(false)
-            .setPositiveButton("Reset") { _, _ -> resetApp() }
-            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Reset") { _, _ ->
+                speak("Resetting caregiver access")
+                resetApp()
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                speak("Cancelled")
+            }
             .show()
     }
+
     private fun resetApp() {
         caregiverPrefs.clearPin()
         caregiverPrefs.resetLock()
 
-        // 🚀 Go DIRECTLY to Set PIN
         val intent =
             Intent(this, CaregiverLoginActivity::class.java)
-                .putExtra(MODE, MODE_SET)
+                .putExtra("MODE", MODE_SET)
 
         intent.flags =
             Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -203,5 +228,4 @@ class CaregiverLoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
 }
