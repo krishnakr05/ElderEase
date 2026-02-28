@@ -34,36 +34,29 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var txtDate: TextView
     private lateinit var txtBattery: TextView
 
+    private lateinit var recyclerView: androidx.recyclerview.widget.RecyclerView
+    private lateinit var appAdapter: AppAdapter
+    private val apps = mutableListOf<AppInfo>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
-        if (!prefs.getBoolean(SetupAppsActivity.KEY_SETUP_COMPLETE, false)) {
-            startActivity(Intent(this, SetupAppsActivity::class.java))
-            finish()
-            return
-        }
-
         setContentView(R.layout.activity_home)
 
-        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
+        //val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
+        recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.isNestedScrollingEnabled = false
 
-        val packages = prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "")
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?: emptyList()
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        recyclerView.isNestedScrollingEnabled = false
 
-        val apps = loadSelectedApps(packages)
-
-        Log.d("HomeActivity", "Selected packages: $packages")
-        Log.d("HomeActivity", "Loaded apps count: ${apps.size}")
-
-        recyclerView.adapter = AppAdapter(apps) { app ->
+        appAdapter = AppAdapter(apps) { app ->
             launchApp(app)
         }
+        recyclerView.adapter = appAdapter
+
+        refreshApps()   // initial load
 
         txtTime = findViewById(R.id.txtTime)
         txtDate = findViewById(R.id.txtDate)
@@ -105,6 +98,34 @@ class HomeActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshApps()
+    }
+
+    private fun refreshApps() {
+        val prefs = getSharedPreferences(
+            SetupAppsActivity.PREFS_NAME,
+            MODE_PRIVATE
+        )
+
+        val packages = prefs
+            .getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?: emptyList()
+
+        val newApps = loadSelectedApps(packages)
+
+        apps.clear()
+        apps.addAll(newApps)
+        appAdapter.notifyDataSetChanged()
+
+        Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
+        Log.d("HomeActivity", "Saved packages raw: ${prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "NULL")}")
+    }
+
     private fun startClock() {
         val handler = Handler(Looper.getMainLooper())
         val runnable = object : Runnable {
@@ -140,7 +161,9 @@ class HomeActivity : AppCompatActivity() {
                 result.add(AppInfo(label = label, icon = icon, launchIntent = launchIntent))
             } catch (e: PackageManager.NameNotFoundException) {
             }
+            Log.d("HomeActivity", "Trying to load: $pkg")
         }
+
         return result
     }
 

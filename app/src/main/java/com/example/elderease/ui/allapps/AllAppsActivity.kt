@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.AppInfo
-import com.example.elderease.ui.home.AppAdapter
 
 class AllAppsActivity : AppCompatActivity() {
 
@@ -23,7 +22,7 @@ class AllAppsActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 3)
 
         val apps = loadAllApps()
-        val adapter = AppAdapter(apps) { app ->
+        val adapter = AllAppsAdapter.AllAppsAdapter(apps) { app ->
             app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(app.launchIntent)
         }
