@@ -2,7 +2,6 @@ package com.example.elderease.ui.caregiver
 
 import android.app.KeyguardManager
 import android.content.Intent
-import android.media.MediaCodec.MetricsConstants.MODE
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -22,6 +21,7 @@ import com.example.elderease.ui.setup.SetupAppsActivity
 class CaregiverLoginActivity : AppCompatActivity() {
 
     companion object {
+        const val EXTRA_MODE = "EXTRA_MODE"
         const val MODE_SET = "SET_PIN"
         const val MODE_VERIFY = "VERIFY_PIN"
         private const val REQUEST_DEVICE_AUTH = 1001
@@ -47,7 +47,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
         caregiverPrefs = CaregiverPrefs(this)
 
-        mode = intent.getStringExtra("MODE")
+        mode = intent.getStringExtra(EXTRA_MODE)
             ?: if (caregiverPrefs.isPinSet()) MODE_VERIFY else MODE_SET
 
         tvTitle = findViewById(R.id.tvTitle)
@@ -187,14 +187,13 @@ class CaregiverLoginActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
     private fun resetApp() {
         caregiverPrefs.clearPin()
         caregiverPrefs.resetLock()
 
-        // 🚀 Go DIRECTLY to Set PIN
-        val intent =
-            Intent(this, CaregiverLoginActivity::class.java)
-                .putExtra(MODE, MODE_SET)
+        val intent = Intent(this, CaregiverLoginActivity::class.java)
+            .putExtra(EXTRA_MODE, MODE_SET)
 
         intent.flags =
             Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -203,5 +202,4 @@ class CaregiverLoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
 }

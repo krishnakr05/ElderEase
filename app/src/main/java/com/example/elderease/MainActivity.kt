@@ -9,6 +9,7 @@ import com.example.elderease.ui.home.HomeActivity
 import com.example.elderease.data.storage.SetupState
 import com.example.elderease.ui.setup.SetupAppsActivity
 import com.example.elderease.ui.setup.ContactSetupActivity
+import com.example.elderease.ui.setup.FavouriteContactSetupActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,36 +20,35 @@ class MainActivity : AppCompatActivity() {
         val caregiverPrefs = CaregiverPrefs(this)
 
         when {
-            // 1️⃣ Apps not selected
+            // 1️⃣ Apps
             !setupState.isAppsDone() -> {
-                startActivity(
-                    Intent(this, SetupAppsActivity::class.java)
-                )
+                startActivity(Intent(this, SetupAppsActivity::class.java))
             }
 
-            // 2️⃣ Contacts not selected
+            // 2️⃣ Favourite Contacts (MANDATORY)
+            !setupState.isFavouriteContactsDone() -> {
+                startActivity(Intent(this, FavouriteContactSetupActivity::class.java))
+            }
+
+            // 3️⃣ SOS Contacts
             !setupState.isContactsDone() -> {
-                startActivity(
-                    Intent(this, ContactSetupActivity::class.java)
-                )
+                startActivity(Intent(this, ContactSetupActivity::class.java))
             }
 
-            // 3️⃣ Caregiver PIN not set
-            !caregiverPrefs.isPinSet() -> {
+            // 4️⃣ Caregiver PIN
+            !setupState.isPinDone() -> {
                 startActivity(
                     Intent(this, CaregiverLoginActivity::class.java)
                         .putExtra(
-                            "MODE",
+                            CaregiverLoginActivity.EXTRA_MODE,
                             CaregiverLoginActivity.MODE_SET
                         )
                 )
             }
 
-            // 4️⃣ All done
+            // 5️⃣ Home
             else -> {
-                startActivity(
-                    Intent(this, HomeActivity::class.java)
-                )
+                startActivity(Intent(this, HomeActivity::class.java))
             }
         }
 

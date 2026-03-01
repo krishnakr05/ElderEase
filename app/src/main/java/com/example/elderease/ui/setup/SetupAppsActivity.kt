@@ -122,7 +122,7 @@ class SetupAppsActivity : ComponentActivity() {
         SetupState(this).markAppsDone()
 
         // ✅ first-time setup flow
-        startActivity(Intent(this, ContactSetupActivity::class.java))
+        startActivity(Intent(this, FavouriteContactSetupActivity::class.java))
         finish()
     }
 }

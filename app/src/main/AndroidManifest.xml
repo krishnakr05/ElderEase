@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ================= PERMISSIONS ================= -->
+
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <!-- Declare telephony is optional -->
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
-    <!-- Emergency permissions -->
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
     <queries>
         <intent>
             <action android:name="android.intent.action.DIAL"/>
@@ -40,8 +41,8 @@
 
             <!-- Normal app launch (for testing) -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
             <!-- Launcher capability -->
@@ -59,7 +60,21 @@
             android:exported="true" />
 
         <!-- EMERGENCY -->
-        <activity android:name=".ui.emergency.EmergencyActivity"/>
+        <activity
+            android:name=".ui.emergency.EmergencyActivity"
+            android:exported="false"/>
+
+        <!-- APPS SETUP -->
+        <activity
+            android:name=".ui.setup.SetupAppsActivity"
+            android:exported="false"/>
+
+        <!-- FAVOURITE CONTACT SETUP -->
+        <activity
+            android:name=".ui.setup.FavouriteContactSetupActivity"
+            android:exported="false"/>
+
+        <!-- SOS CONTACT SETUP -->
         <activity
             android:name=".ui.setup.ContactSetupActivity"
             android:exported="false"/>
@@ -82,14 +97,9 @@
         <!-- CONTACTS -->
         <activity android:name=".ui.contacts.ContactsActivity"/>
 
-        <!-- SETUP -->
-        <activity android:name=".ui.setup.SetupAppsActivity"/>
-
         <!-- ALL APPS -->
         <activity android:name=".ui.allapps.AllAppsActivity"/>
 
     </application>
-
-
 
 </manifest>

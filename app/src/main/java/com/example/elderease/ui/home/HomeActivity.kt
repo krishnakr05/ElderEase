@@ -43,7 +43,6 @@ class HomeActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_home)
 
-        //val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.isNestedScrollingEnabled = false
@@ -90,7 +89,6 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
 
-        // ⭐ NEW FEATURE — VIEW ALL APPS
         findViewById<Button>(R.id.btnAllApps).setOnClickListener {
             startActivity(Intent(this, AllAppsActivity::class.java))
         }
@@ -161,9 +159,7 @@ class HomeActivity : AppCompatActivity() {
                 result.add(AppInfo(label = label, icon = icon, launchIntent = launchIntent))
             } catch (e: PackageManager.NameNotFoundException) {
             }
-            Log.d("HomeActivity", "Trying to load: $pkg")
         }
-
         return result
     }
 

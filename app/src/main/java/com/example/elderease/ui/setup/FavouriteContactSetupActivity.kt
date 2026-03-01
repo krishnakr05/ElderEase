@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.widget.Button
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,19 +15,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.data.storage.SetupState
 import com.example.elderease.model.ContactInfo
-import com.example.elderease.ui.caregiver.CaregiverLoginActivity
-import com.example.elderease.ui.common.ContactRepository
-import com.example.elderease.ui.home.HomeActivity
 
-class ContactSetupActivity : ComponentActivity() {
+class FavouriteContactSetupActivity : AppCompatActivity() {
 
     private val contacts = mutableListOf<ContactInfo>()
-    private val selectedOrder = mutableListOf<ContactInfo>()  // 🔥 maintains preference order
+    private val selectedContacts = mutableListOf<String>()
     private lateinit var adapter: ContactAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_contact_setup)
+        setContentView(R.layout.activity_favourite_contact_setup)
 
         val recyclerView = findViewById<RecyclerView>(R.id.contactList)
         val saveButton = findViewById<Button>(R.id.saveButton)
@@ -35,22 +32,11 @@ class ContactSetupActivity : ComponentActivity() {
         adapter = ContactAdapter(contacts) { contact, isChecked ->
 
             if (isChecked) {
-
-                if (selectedOrder.size >= 3) {
-                    Toast.makeText(
-                        this,
-                        "You can select only 3 emergency contacts",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    contact.isSelected = false
-                    adapter.notifyDataSetChanged()
-                    return@ContactAdapter
+                if (!selectedContacts.contains(contact.phone)) {
+                    selectedContacts.add(contact.phone)
                 }
-
-                selectedOrder.add(contact)
-
             } else {
-                selectedOrder.remove(contact)
+                selectedContacts.remove(contact.phone)
             }
         }
 
@@ -61,33 +47,26 @@ class ContactSetupActivity : ComponentActivity() {
 
         saveButton.setOnClickListener {
 
-            if (selectedOrder.size != 3) {
+            if (selectedContacts.isEmpty()) {
                 Toast.makeText(
                     this,
-                    "Please select exactly 3 emergency contacts",
+                    "Please select at least one favourite contact",
                     Toast.LENGTH_LONG
                 ).show()
                 return@setOnClickListener
             }
 
-            // 🔥 Save in selection order
-            val phones = selectedOrder.map { it.phone }
-            ContactRepository.saveSelectedPhones(this, phones)
+            // Save favourites
+            getSharedPreferences("elder_favourites", MODE_PRIVATE)
+                .edit()
+                .putString("fav_contacts", selectedContacts.joinToString(","))
+                .apply()
 
-            // ✅ MARK SETUP DONE (correct way)
-            SetupState(this).markContactsDone()
+            // ✅ VERY IMPORTANT: mark favourite contacts step as done
+            SetupState(this).markFavouriteContactsDone()
 
-            Toast.makeText(
-                this,
-                "SOS contacts saved successfully",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            // ✅ Let launcher decide next screen
-            startActivity(
-                Intent(this, CaregiverLoginActivity::class.java)
-                    .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
-            )
+            // Move to next step
+            startActivity(Intent(this, ContactSetupActivity::class.java))
             finish()
         }
     }
