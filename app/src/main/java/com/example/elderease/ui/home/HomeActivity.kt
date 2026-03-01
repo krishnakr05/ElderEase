@@ -24,8 +24,6 @@ import com.example.elderease.ui.setup.SetupAppsActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import com.example.elderease.ui.contacts.ContactsActivity
-import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 
 class HomeActivity : AppCompatActivity() {
@@ -43,11 +41,7 @@ class HomeActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_home)
 
-        //val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerApps)
         recyclerView = findViewById(R.id.recyclerApps)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.isNestedScrollingEnabled = false
-
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.isNestedScrollingEnabled = false
 
@@ -56,7 +50,7 @@ class HomeActivity : AppCompatActivity() {
         }
         recyclerView.adapter = appAdapter
 
-        refreshApps()   // initial load
+        refreshApps()
 
         txtTime = findViewById(R.id.txtTime)
         txtDate = findViewById(R.id.txtDate)
@@ -72,9 +66,6 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
-        findViewById<android.widget.Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, com.example.elderease.ui.allapps.AllAppsActivity::class.java))
-        }
 
         findViewById<Button>(R.id.btnManual).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -85,17 +76,6 @@ class HomeActivity : AppCompatActivity() {
             intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
             startActivity(intent)
         }
-
-        findViewById<Button>(R.id.btnContacts).setOnClickListener {
-            startActivity(Intent(this, ContactsActivity::class.java))
-        }
-
-        // ⭐ NEW FEATURE — VIEW ALL APPS
-        findViewById<Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, AllAppsActivity::class.java))
-        }
-
-        findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
 
     override fun onResume() {
@@ -123,7 +103,6 @@ class HomeActivity : AppCompatActivity() {
         appAdapter.notifyDataSetChanged()
 
         Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
-        Log.d("HomeActivity", "Saved packages raw: ${prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "NULL")}")
     }
 
     private fun startClock() {
@@ -152,16 +131,24 @@ class HomeActivity : AppCompatActivity() {
     private fun loadSelectedApps(packageNames: List<String>): List<AppInfo> {
         val pm = packageManager
         val result = mutableListOf<AppInfo>()
+
         for (pkg in packageNames) {
             try {
                 val launchIntent = pm.getLaunchIntentForPackage(pkg) ?: continue
                 val appInfo = pm.getApplicationInfo(pkg, 0)
                 val label = pm.getApplicationLabel(appInfo).toString()
                 val icon = pm.getApplicationIcon(appInfo)
-                result.add(AppInfo(label = label, icon = icon, launchIntent = launchIntent))
+
+                result.add(
+                    AppInfo(
+                        label = label,
+                        icon = icon,
+                        launchIntent = launchIntent
+                    )
+                )
             } catch (e: PackageManager.NameNotFoundException) {
+                // Ignore missing apps
             }
-            Log.d("HomeActivity", "Trying to load: $pkg")
         }
 
         return result
