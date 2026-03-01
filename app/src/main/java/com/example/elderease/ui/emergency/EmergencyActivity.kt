@@ -3,6 +3,8 @@ package com.example.elderease.ui.emergency
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,13 @@ import com.example.elderease.R
 class EmergencyActivity : AppCompatActivity() {
 
     private lateinit var manager: EmergencyManager
+    private lateinit var btnHelp: Button
+    private lateinit var btnCancel: Button
+
+    private var timer: CountDownTimer? = null
+    private var countdownStarted = false
+
+    private val PERMISSION_REQUEST_EMERGENCY = 200
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,13 +29,47 @@ class EmergencyActivity : AppCompatActivity() {
 
         manager = EmergencyManager(this)
 
-        // 🔥 IMPORTANT: Your XML button id is btnHelp
-        findViewById<Button>(R.id.btnHelp).setOnClickListener {
-            checkPermissions()
+        btnHelp = findViewById(R.id.btnHelp)
+        btnCancel = findViewById(R.id.btnCancel)
+
+        btnCancel.visibility = View.INVISIBLE
+
+        btnHelp.setOnClickListener {
+            if (!countdownStarted) {
+                startCountdown()
+                countdownStarted = true
+                btnCancel.visibility = View.VISIBLE
+            }
+        }
+
+        btnCancel.setOnClickListener {
+            timer?.cancel()
+            Toast.makeText(this, "Emergency cancelled", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 
-    private fun checkPermissions() {
+    // ---------------- COUNTDOWN ----------------
+
+    private fun startCountdown() {
+        timer = object : CountDownTimer(5000, 1000) {
+
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = millisUntilFinished / 1000
+                btnCancel.text = "CANCEL ($seconds)"
+            }
+
+            override fun onFinish() {
+                btnCancel.text = "Sending help..."
+                checkPermissionsAndTrigger()
+            }
+
+        }.start()
+    }
+
+    // ---------------- PERMISSIONS ----------------
+
+    private fun checkPermissionsAndTrigger() {
 
         val callGranted = ContextCompat.checkSelfPermission(
             this, Manifest.permission.CALL_PHONE
@@ -36,19 +79,17 @@ class EmergencyActivity : AppCompatActivity() {
             this, Manifest.permission.SEND_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
-        if (!callGranted || !smsGranted) {
-
+        if (callGranted && smsGranted) {
+            triggerSOS()
+        } else {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
                     Manifest.permission.CALL_PHONE,
                     Manifest.permission.SEND_SMS
                 ),
-                200
+                PERMISSION_REQUEST_EMERGENCY
             )
-
-        } else {
-            manager.triggerSOS()
         }
     }
 
@@ -59,17 +100,25 @@ class EmergencyActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 200 &&
+        if (requestCode == PERMISSION_REQUEST_EMERGENCY &&
             grantResults.isNotEmpty() &&
             grantResults.all { it == PackageManager.PERMISSION_GRANTED }
         ) {
-            manager.triggerSOS()
+            triggerSOS()
         } else {
             Toast.makeText(
                 this,
                 "Permissions required for SOS",
                 Toast.LENGTH_LONG
             ).show()
+            finish()
         }
+    }
+
+    // ---------------- SOS ----------------
+
+    private fun triggerSOS() {
+        manager.triggerSOS()
+        finish()
     }
 }
