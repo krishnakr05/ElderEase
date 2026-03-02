@@ -26,11 +26,12 @@ class FavouriteContactSetupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favourite_contact_setup)
 
+        val mode = intent.getStringExtra("MODE") ?: "SETUP"
+
         val recyclerView = findViewById<RecyclerView>(R.id.contactList)
         val saveButton = findViewById<Button>(R.id.saveButton)
 
         adapter = ContactAdapter(contacts) { contact, isChecked ->
-
             if (isChecked) {
                 if (!selectedContacts.contains(contact.phone)) {
                     selectedContacts.add(contact.phone)
@@ -56,17 +57,18 @@ class FavouriteContactSetupActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Save favourites
+            // ✅ Save favourites
             getSharedPreferences("elder_favourites", MODE_PRIVATE)
                 .edit()
                 .putString("fav_contacts", selectedContacts.joinToString(","))
                 .apply()
 
-            // ✅ VERY IMPORTANT: mark favourite contacts step as done
             SetupState(this).markFavouriteContactsDone()
 
-            // Move to next step
-            startActivity(Intent(this, ContactSetupActivity::class.java))
+            if (mode == "SETUP") {
+                startActivity(Intent(this, ContactSetupActivity::class.java))
+            }
+
             finish()
         }
     }
@@ -111,8 +113,21 @@ class FavouriteContactSetupActivity : AppCompatActivity() {
     private fun loadContacts() {
 
         contacts.clear()
+        selectedContacts.clear()
 
-        val uniquePhones = mutableSetOf<String>()  // 🔥 remove duplicates by phone
+        // 🔥 Load saved favourites
+        val savedPhones = getSharedPreferences("elder_favourites", MODE_PRIVATE)
+            .getString("fav_contacts", "")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+
+        val savedSet = savedPhones.map {
+            it.replace("\\s".toRegex(), "").replace("-", "")
+        }
+
+        val uniquePhones = mutableSetOf<String>()
 
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -143,15 +158,21 @@ class FavouriteContactSetupActivity : AppCompatActivity() {
                     )
                 )
 
-                // 🔥 Clean phone formatting (+91, spaces, dashes)
                 phone = phone.replace("\\s".toRegex(), "")
                     .replace("-", "")
 
-                // 🚀 Skip if same phone already added
                 if (uniquePhones.contains(phone)) continue
                 uniquePhones.add(phone)
 
-                contacts.add(ContactInfo(id, name, phone))
+                val contact = ContactInfo(id, name, phone)
+
+                // ✅ PRESELECT saved favourites
+                if (savedSet.contains(phone)) {
+                    contact.isSelected = true
+                    selectedContacts.add(phone)
+                }
+
+                contacts.add(contact)
             }
         }
 
