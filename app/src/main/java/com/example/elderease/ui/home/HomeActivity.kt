@@ -45,10 +45,14 @@ class HomeActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.isNestedScrollingEnabled = false
-
+        recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.isNestedScrollingEnabled = false
+
+        appAdapter = AppAdapter(apps) { app ->
+            launchApp(app)
+        }
+        recyclerView.adapter = appAdapter
+
 
         appAdapter = AppAdapter(apps) { app ->
             launchApp(app)
