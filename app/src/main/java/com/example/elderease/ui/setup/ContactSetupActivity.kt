@@ -29,6 +29,8 @@ class ContactSetupActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contact_setup)
 
+        val mode = intent.getStringExtra("MODE") ?: "SETUP"
+
         val recyclerView = findViewById<RecyclerView>(R.id.contactList)
         val saveButton = findViewById<Button>(R.id.saveButton)
 
@@ -50,7 +52,7 @@ class ContactSetupActivity : ComponentActivity() {
                 selectedOrder.add(contact)
 
             } else {
-                selectedOrder.remove(contact)
+                selectedOrder.removeAll { it.phone == contact.phone }
             }
         }
 
@@ -74,8 +76,9 @@ class ContactSetupActivity : ComponentActivity() {
             val phones = selectedOrder.map { it.phone }
             ContactRepository.saveSelectedPhones(this, phones)
 
-            // ✅ MARK SETUP DONE (correct way)
-            SetupState(this).markContactsDone()
+            if (mode == "SETUP") {
+                SetupState(this).markContactsDone()
+            }
 
             Toast.makeText(
                 this,
@@ -84,10 +87,13 @@ class ContactSetupActivity : ComponentActivity() {
             ).show()
 
             // ✅ Let launcher decide next screen
-            startActivity(
-                Intent(this, CaregiverLoginActivity::class.java)
-                    .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
-            )
+            if (mode == "SETUP") {
+                startActivity(
+                    Intent(this, CaregiverLoginActivity::class.java)
+                        .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
+                )
+            }
+
             finish()
         }
     }
@@ -132,8 +138,16 @@ class ContactSetupActivity : ComponentActivity() {
     private fun loadContacts() {
 
         contacts.clear()
+        selectedOrder.clear()
 
-        val uniquePhones = mutableSetOf<String>()  // 🔥 remove duplicates by phone
+        val uniquePhones = mutableSetOf<String>()
+
+        // ✅ Load previously saved SOS contacts
+        val savedPhones = ContactRepository.loadSelectedPhones(this)
+
+        val savedSet = savedPhones.map {
+            it.replace("\\s".toRegex(), "").replace("-", "")
+        }
 
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -164,19 +178,32 @@ class ContactSetupActivity : ComponentActivity() {
                     )
                 )
 
-                // 🔥 Clean phone formatting (+91, spaces, dashes)
                 phone = phone.replace("\\s".toRegex(), "")
                     .replace("-", "")
 
-                // 🚀 Skip if same phone already added
                 if (uniquePhones.contains(phone)) continue
                 uniquePhones.add(phone)
 
-                contacts.add(ContactInfo(id, name, phone))
+                val contact = ContactInfo(id, name, phone)
+
+                // ✅ Preselect previously saved contacts
+                if (savedSet.contains(phone)) {
+                    contact.isSelected = true
+                }
+
+                contacts.add(contact)
             }
         }
 
         contacts.sortBy { it.name.lowercase() }
+
+        // ✅ Restore exact selection order
+        savedPhones.forEach { savedPhone ->
+            contacts.find { it.phone == savedPhone }?.let {
+                selectedOrder.add(it)
+            }
+        }
+
         adapter.notifyDataSetChanged()
     }
 }
