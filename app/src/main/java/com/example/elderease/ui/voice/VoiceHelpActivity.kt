@@ -3,6 +3,7 @@ package com.example.elderease.ui.voice
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.speech.*
@@ -27,8 +28,6 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var btnStop: Button
     private lateinit var tts: TextToSpeech
 
-    private var isListening = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_voice_help)
@@ -37,8 +36,6 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         btnMic = findViewById(R.id.btnMic)
         btnBack = findViewById(R.id.btnBack)
         btnStop = findViewById(R.id.btnStop)
-
-        txtResult.text = "Tap the mic to speak"
 
         tts = TextToSpeech(this, this)
 
@@ -53,9 +50,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         btnBack.setOnClickListener { finish() }
-
         btnMic.setOnClickListener { startListening() }
-
         btnStop.setOnClickListener { stopListening() }
 
         setupListener()
@@ -71,7 +66,6 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
-    // ⭐ START LISTENING
     private fun startListening() {
 
         if (ContextCompat.checkSelfPermission(
@@ -87,24 +81,13 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
 
-        if (!isListening) {
-            isListening = true
-            txtResult.text = "Listening..."
-            speechRecognizer.startListening(speechIntent)
-        }
+        txtResult.text = "Listening..."
+        speechRecognizer.startListening(speechIntent)
     }
 
-    // ⭐ STOP LISTENING MANUALLY
     private fun stopListening() {
-        try {
-            speechRecognizer.stopListening()
-            speechRecognizer.cancel()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        isListening = false
-        txtResult.text = "Tap the mic to speak"
+        speechRecognizer.stopListening()
+        txtResult.text = "Tap the microphone to speak"
     }
 
     private fun setupListener() {
@@ -119,61 +102,108 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 val spoken = matches?.get(0) ?: ""
 
                 txtResult.text = spoken
-                isListening = false
 
                 handleCommand(spoken.lowercase(Locale.getDefault()))
             }
 
             override fun onError(error: Int) {
-                txtResult.text = "Tap the mic to speak"
-                isListening = false
-            }
-
-            override fun onEndOfSpeech() {
-                // Normal behavior — stops automatically
+                txtResult.text = "Try again"
             }
 
             override fun onReadyForSpeech(p0: Bundle?) {}
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(p0: Float) {}
             override fun onBufferReceived(p0: ByteArray?) {}
+            override fun onEndOfSpeech() {}
             override fun onPartialResults(p0: Bundle?) {}
             override fun onEvent(p0: Int, p1: Bundle?) {}
         })
     }
 
-    // ⭐ COMMAND HANDLER
+    // 🔥 ADVANCED COMMAND HANDLER
     private fun handleCommand(command: String) {
 
-        when {
+        var clean = command.lowercase(Locale.getDefault()).trim()
 
-            command.contains("open") -> {
-                val appName = command.replace("open", "").trim()
-                openAnyApp(appName)
-            }
-
-            command.contains("call") -> {
-                val name = command.replace("call", "").trim()
-                callContact(name)
-            }
-
-            command.contains("help") -> {
-                startActivity(Intent(this, EmergencyActivity::class.java))
-            }
-
-            command.contains("stop") -> {
-                stopListening()
-            }
-
-            else -> speak("I did not understand")
+        // Remove common action words
+        val actionWords = listOf("open", "start", "launch", "please", "the")
+        actionWords.forEach {
+            clean = clean.replace(it, "").trim()
         }
+
+        // 🔴 Emergency triggers
+        if (clean.contains("help") ||
+            clean.contains("emergency") ||
+            clean.contains("danger") ||
+            clean.contains("i fell")
+        ) {
+            speak("Opening emergency screen")
+            startActivity(Intent(this, EmergencyActivity::class.java))
+            return
+        }
+
+        // 🛑 Stop command
+        if (clean.contains("stop")) {
+            stopListening()
+            return
+        }
+
+        // 📞 Call command
+        if (command.startsWith("call ")) {
+            val name = command.removePrefix("call ").trim()
+            callContact(name)
+            return
+        }
+
+        // Try direct contact
+        if (tryCallContact(clean)) return
+
+        // Try open app
+        if (openAppByName(clean)) return
+
+        speak("I did not understand. Please try again.")
     }
 
-    // ⭐ OPEN APP
-    private fun openAnyApp(appName: String) {
+    private fun tryCallContact(nameQuery: String): Boolean {
+
+        val cursor = contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            null,
+            "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} LIKE ?",
+            arrayOf("%$nameQuery%"),
+            null
+        )
+
+        cursor?.use {
+
+            if (it.moveToFirst()) {
+
+                val phoneIndex = it.getColumnIndexOrThrow(
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+                )
+
+                val phone = it.getString(phoneIndex)
+
+                val intent = Intent(Intent.ACTION_CALL)
+                intent.data = Uri.parse("tel:$phone")
+
+                speak("Calling $nameQuery")
+                startActivity(intent)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    private fun callContact(name: String) {
+        tryCallContact(name)
+    }
+
+    private fun openAppByName(appName: String): Boolean {
 
         val pm = packageManager
-        val intent = Intent(Intent.ACTION_MAIN, null)
+        val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
 
         val apps = pm.queryIntentActivities(intent, 0)
@@ -189,63 +219,13 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
                 launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
+                speak("Opening $label")
                 startActivity(launchIntent)
-                return
+                return true
             }
         }
 
-        speak("App not found")
-    }
-
-    // ⭐ CALL CONTACT
-    private fun callContact(nameQuery: String) {
-
-        if (nameQuery.isEmpty()) {
-            speak("Please say the contact name")
-            return
-        }
-
-        val cursor = contentResolver.query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            null,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ?",
-            arrayOf("%$nameQuery%"),
-            null
-        )
-
-        cursor?.use {
-
-            if (it.moveToFirst()) {
-
-                val phoneIndex = it.getColumnIndexOrThrow(
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
-                )
-
-                val phone = it.getString(phoneIndex)
-
-                if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.CALL_PHONE
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.CALL_PHONE),
-                        2
-                    )
-                    return
-                }
-
-                val intent = Intent(Intent.ACTION_CALL)
-                intent.data = android.net.Uri.parse("tel:$phone")
-
-                startActivity(intent)
-                speak("Calling now")
-                return
-            }
-        }
-
-        speak("Contact not found")
+        return false
     }
 
     override fun onDestroy() {

@@ -31,7 +31,7 @@
                     android:textStyle="bold"
                     android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"/>
 
                 <TextView
                     android:id="@+id/txtBattery"
@@ -61,52 +61,63 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-            <!-- MANUAL + HELP -->
+            <!-- EMERGENCY + HELP -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="130dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
 
+                <!-- EMERGENCY BUTTON -->
                 <Button
-                    android:id="@+id/btnManual"
-                    android:text="Manual"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:background="@drawable/manual_bg"/>
-
-                <Button
-                    android:id="@+id/btnHelp"
-                    android:text="Help Me"
+                    android:id="@+id/btnEmergency"
+                    android:text="EMERGENCY"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
+                    android:textSize="22sp"
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:background="@drawable/help_bg"/>
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/emergency_bg"
+                    android:elevation="6dp"/>
+
+                <!-- HELP CARD -->
+                <LinearLayout
+                    android:id="@+id/btnHelp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/help_bg"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:elevation="6dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_mic"
+                        android:tint="#FFFFFF"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:text="HELP ME"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
-            <!-- EMERGENCY -->
-            <Button
-                android:id="@+id/btnEmergency"
-                android:text="EMERGENCY"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="24sp"
-                android:layout_marginTop="20dp"
-                android:elevation="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="140dp"
-                android:background="@drawable/emergency_bg"/>
-
-            <!-- VIEW ALL APPS BUTTON -->
+            <!-- VIEW ALL APPS -->
             <Button
                 android:id="@+id/btnAllApps"
-                android:text="View All Apps"
+                android:text="VIEW ALL APPS"
                 android:textStyle="bold"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"/>
 
@@ -118,19 +129,19 @@
                 android:layout_marginTop="25dp"/>
 
         </LinearLayout>
+
     </ScrollView>
 
-    <!-- BOTTOM NAV -->
+    <!-- BOTTOM NAVIGATION -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:background="#FFFFFF"
-        android:gravity="center"
         android:orientation="horizontal"
         android:elevation="8dp">
 
         <Button
-            android:text="Home"
+            android:text="HOME"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -138,7 +149,7 @@
 
         <Button
             android:id="@+id/btnContacts"
-            android:text="Contacts"
+            android:text="CONTACTS"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -146,7 +157,7 @@
 
         <Button
             android:id="@+id/btnSettings"
-            android:text="Settings"
+            android:text="SETTINGS"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"
