@@ -10,8 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.elderease.BaseActivity
 import com.example.elderease.R
 import com.example.elderease.ui.emergency.EmergencyActivity
 import com.example.elderease.ui.settings.SettingsActivity
@@ -24,9 +24,11 @@ import com.example.elderease.ui.setup.SetupAppsActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import com.example.elderease.ui.contacts.ContactsActivity
+import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : BaseActivity() {
 
     private lateinit var txtTime: TextView
     private lateinit var txtDate: TextView
@@ -43,11 +45,11 @@ class HomeActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.isNestedScrollingEnabled = false
 
         appAdapter = AppAdapter(apps) { app ->
             launchApp(app)
         }
+
         recyclerView.adapter = appAdapter
 
         refreshApps()
@@ -60,22 +62,44 @@ class HomeActivity : AppCompatActivity() {
         monitorBattery()
 
         findViewById<Button>(R.id.btnHelp).setOnClickListener {
-            startActivity(Intent(this, VoiceHelpActivity::class.java))
+            speakAndRun("Opening voice help") {
+                startActivity(Intent(this, VoiceHelpActivity::class.java))
+            }
         }
 
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
-            startActivity(Intent(this, EmergencyActivity::class.java))
+            speakAndRun("Opening emergency") {
+                startActivity(Intent(this, EmergencyActivity::class.java))
+            }
+        }
+
+        findViewById<Button>(R.id.btnAllApps).setOnClickListener {
+            speakAndRun("Opening all apps") {
+                startActivity(Intent(this, AllAppsActivity::class.java))
+            }
         }
 
         findViewById<Button>(R.id.btnManual).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            speakAndRun("Opening manual") {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
-            val intent = Intent(this, CaregiverLoginActivity::class.java)
-            intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
-            startActivity(intent)
+            speakAndRun("Opening settings") {
+                val intent = Intent(this, CaregiverLoginActivity::class.java)
+                intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
+                startActivity(intent)
+            }
         }
+
+        findViewById<Button>(R.id.btnContacts).setOnClickListener {
+            speakAndRun("Opening contacts") {
+                startActivity(Intent(this, ContactsActivity::class.java))
+            }
+        }
+
+        findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
 
     override fun onResume() {
@@ -84,6 +108,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun refreshApps() {
+
         val prefs = getSharedPreferences(
             SetupAppsActivity.PREFS_NAME,
             MODE_PRIVATE
@@ -100,44 +125,74 @@ class HomeActivity : AppCompatActivity() {
 
         apps.clear()
         apps.addAll(newApps)
+
         appAdapter.notifyDataSetChanged()
 
         Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
     }
 
     private fun startClock() {
+
         val handler = Handler(Looper.getMainLooper())
+
         val runnable = object : Runnable {
+
             override fun run() {
+
                 val now = Date()
-                txtTime.text = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
-                txtDate.text = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
+
+                txtTime.text =
+                    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
+
+                txtDate.text =
+                    SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
+
                 handler.postDelayed(this, 1000)
             }
         }
+
         handler.post(runnable)
     }
 
     private fun monitorBattery() {
+
         val batteryReceiver = object : BroadcastReceiver() {
+
             override fun onReceive(context: Context?, intent: Intent?) {
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+
+                val level =
+                    intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+
                 txtBattery.text = "$level%"
             }
         }
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+
+        registerReceiver(
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
     }
 
     private fun loadSelectedApps(packageNames: List<String>): List<AppInfo> {
+
         val pm = packageManager
+
         val result = mutableListOf<AppInfo>()
 
         for (pkg in packageNames) {
+
             try {
-                val launchIntent = pm.getLaunchIntentForPackage(pkg) ?: continue
+
+                val launchIntent =
+                    pm.getLaunchIntentForPackage(pkg) ?: continue
+
                 val appInfo = pm.getApplicationInfo(pkg, 0)
-                val label = pm.getApplicationLabel(appInfo).toString()
-                val icon = pm.getApplicationIcon(appInfo)
+
+                val label =
+                    pm.getApplicationLabel(appInfo).toString()
+
+                val icon =
+                    pm.getApplicationIcon(appInfo)
 
                 result.add(
                     AppInfo(
@@ -146,8 +201,9 @@ class HomeActivity : AppCompatActivity() {
                         launchIntent = launchIntent
                     )
                 )
+
             } catch (e: PackageManager.NameNotFoundException) {
-                // Ignore missing apps
+
             }
         }
 
@@ -155,14 +211,22 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun launchApp(app: AppInfo) {
-        app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(app.launchIntent)
+
+        speakAndRun("Opening ${app.label}") {
+
+            app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            startActivity(app.launchIntent)
+        }
     }
 
     private fun callContact(contact: ContactInfo) {
+
         val intent = Intent(Intent.ACTION_DIAL).apply {
+
             data = Uri.parse("tel:${contact.phone}")
         }
+
         startActivity(intent)
     }
 }

@@ -8,21 +8,23 @@ import com.example.elderease.ui.setup.SetupAppsActivity
 object ContactRepository {
 
     fun loadSelectedContacts(context: Context): List<ContactInfo> {
+
         val prefs = context.getSharedPreferences(
             SetupAppsActivity.PREFS_NAME,
             Context.MODE_PRIVATE
         )
 
         val raw = prefs.getString("selected_contact_ids", "") ?: ""
+
         val ids = raw.split(",").filter { it.isNotBlank() }
 
         if (ids.isEmpty()) return emptyList()
 
         val result = mutableListOf<ContactInfo>()
-        val seenIds = HashSet<String>()
 
-        val selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID +
-                " IN (" + ids.joinToString(",") { "?" } + ")"
+        val selection =
+            ContactsContract.CommonDataKinds.Phone.CONTACT_ID +
+                    " IN (" + ids.joinToString(",") { "?" } + ")"
 
         context.contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -33,22 +35,30 @@ object ContactRepository {
             ),
             selection,
             ids.toTypedArray(),
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE NOCASE ASC"
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME +
+                    " COLLATE NOCASE ASC"
         )?.use { cursor ->
 
             val idIdx = cursor.getColumnIndexOrThrow(
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID
             )
+
             val nameIdx = cursor.getColumnIndexOrThrow(
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
             )
+
             val phoneIdx = cursor.getColumnIndexOrThrow(
                 ContactsContract.CommonDataKinds.Phone.NUMBER
             )
 
+            val seen = HashSet<String>()
+
             while (cursor.moveToNext()) {
+
                 val id = cursor.getString(idIdx)
-                if (!seenIds.add(id)) continue
+
+                if (seen.contains(id)) continue
+                seen.add(id)
 
                 result.add(
                     ContactInfo(
@@ -62,17 +72,20 @@ object ContactRepository {
 
         return result
     }
+
     fun saveSelectedContacts(context: Context, contacts: List<ContactInfo>) {
+
         val prefs = context.getSharedPreferences(
             SetupAppsActivity.PREFS_NAME,
             Context.MODE_PRIVATE
         )
 
-        val ids = contacts.filter { it.isSelected }.joinToString(",") { it.id }
+        val ids = contacts
+            .filter { it.isSelected }
+            .joinToString(",") { it.id }
 
         prefs.edit()
             .putString("selected_contact_ids", ids)
             .apply()
     }
-
 }

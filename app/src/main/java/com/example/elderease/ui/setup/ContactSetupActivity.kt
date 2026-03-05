@@ -66,7 +66,7 @@ class ContactSetupActivity : ComponentActivity() {
 
         val prefs =
             getSharedPreferences(
-                "favorite_contacts",
+                SetupAppsActivity.PREFS_NAME,
                 MODE_PRIVATE
             )
 
@@ -182,7 +182,7 @@ class ContactSetupActivity : ComponentActivity() {
 
         val prefs =
             getSharedPreferences(
-                "favorite_contacts",
+                SetupAppsActivity.PREFS_NAME,
                 MODE_PRIVATE
             )
 

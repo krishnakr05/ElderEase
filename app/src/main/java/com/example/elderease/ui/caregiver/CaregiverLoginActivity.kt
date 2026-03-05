@@ -2,7 +2,10 @@ package com.example.elderease.ui.caregiver
 
 import android.app.KeyguardManager
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -22,9 +25,17 @@ class CaregiverLoginActivity : BaseActivity() {
         const val MODE_SET = "SET_PIN"
         const val MODE_VERIFY = "VERIFY_PIN"
         private const val REQUEST_DEVICE_AUTH = 1001
+
+        private const val PREF_NAME = "caregiver_lock_prefs"
+        private const val KEY_FAILED_ATTEMPTS = "failed_pin_attempts"
+        private const val KEY_LAST_FAILED_TIME = "last_failed_time"
+
+        private const val MAX_ATTEMPTS = 5
+        private const val LOCK_DURATION_MS = 2 * 60 * 1000L
     }
 
     private lateinit var caregiverPrefs: CaregiverPrefs
+    private lateinit var lockPrefs: SharedPreferences
     private lateinit var mode: String
 
     private lateinit var tvTitle: TextView
@@ -34,14 +45,15 @@ class CaregiverLoginActivity : BaseActivity() {
     private lateinit var etPin2: EditText
     private lateinit var btnAction: Button
 
-    private val MAX_ATTEMPTS = 3
-    private var attemptsLeft = MAX_ATTEMPTS
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var unlockRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_caregiver_login)
 
         caregiverPrefs = CaregiverPrefs(this)
+        lockPrefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
 
         mode = intent.getStringExtra("MODE")
             ?: if (caregiverPrefs.isPinSet()) MODE_VERIFY else MODE_SET
@@ -54,6 +66,10 @@ class CaregiverLoginActivity : BaseActivity() {
         btnAction = findViewById(R.id.btnSetPin)
 
         updateUIForMode()
+
+        if (mode == MODE_VERIFY) {
+            checkIfLocked()
+        }
 
         btnAction.setOnClickListener {
             vibrate()
@@ -120,6 +136,7 @@ class CaregiverLoginActivity : BaseActivity() {
                 if (pin1 != pin2) {
                     tvError.text = "PINs do not match"
                     speak("PINs do not match")
+                    clearPinFields()
                     return
                 }
 
@@ -140,7 +157,14 @@ class CaregiverLoginActivity : BaseActivity() {
                     return
                 }
 
+                if (isLockActive()) {
+                    showLockMessage()
+                    return
+                }
+
                 if (pin1 == savedPin) {
+
+                    resetLockState()
 
                     speakAndRun("Access granted") {
                         startActivity(Intent(this, SettingsActivity::class.java))
@@ -149,29 +173,168 @@ class CaregiverLoginActivity : BaseActivity() {
 
                 } else {
 
-                    attemptsLeft--
-                    tvError.text = "Wrong PIN. Attempts left: $attemptsLeft"
-                    speak("Wrong PIN")
+                    incrementFailedAttempts()
 
-                    if (attemptsLeft <= 0) {
-                        btnAction.isEnabled = false
-                        speak("Too many attempts. Access locked")
+                    val attemptsLeft =
+                        MAX_ATTEMPTS - lockPrefs.getInt(KEY_FAILED_ATTEMPTS, 0)
+
+                    if (attemptsLeft > 0) {
+
+                        tvError.text =
+                            "Incorrect PIN. Attempts left: $attemptsLeft"
+
+                        speak("Incorrect PIN")
+                        clearPinFields()
+
+                    } else {
+
+                        tvError.text =
+                            "Too many incorrect attempts. Please try again later."
+
+                        speak("Settings locked for two minutes")
+                        disableInput()
+                        startUnlockTimer()
                     }
                 }
             }
         }
     }
 
+    private fun incrementFailedAttempts() {
+
+        val attempts =
+            lockPrefs.getInt(KEY_FAILED_ATTEMPTS, 0) + 1
+
+        val editor = lockPrefs.edit()
+        editor.putInt(KEY_FAILED_ATTEMPTS, attempts)
+
+        if (attempts >= MAX_ATTEMPTS) {
+            editor.putLong(
+                KEY_LAST_FAILED_TIME,
+                System.currentTimeMillis()
+            )
+        }
+
+        editor.apply()
+    }
+
+    private fun isLockActive(): Boolean {
+
+        val attempts =
+            lockPrefs.getInt(KEY_FAILED_ATTEMPTS, 0)
+
+        if (attempts < MAX_ATTEMPTS) return false
+
+        val lastFailed =
+            lockPrefs.getLong(KEY_LAST_FAILED_TIME, 0)
+
+        val timePassed =
+            System.currentTimeMillis() - lastFailed
+
+        return if (timePassed < LOCK_DURATION_MS) {
+            true
+        } else {
+            resetLockState()
+            false
+        }
+    }
+
+    private fun checkIfLocked() {
+
+        if (isLockActive()) {
+
+            showLockMessage()
+            disableInput()
+            startUnlockTimer()
+        }
+    }
+
+    private fun startUnlockTimer() {
+
+        unlockRunnable = object : Runnable {
+
+            override fun run() {
+
+                if (!isLockActive()) {
+
+                    enableInput()
+                    tvError.text = ""
+                    speak("You can try again")
+
+                } else {
+
+                    handler.postDelayed(this, 1000)
+                }
+            }
+        }
+
+        handler.postDelayed(unlockRunnable, 1000)
+    }
+
+    private fun showLockMessage() {
+
+        val lastFailed =
+            lockPrefs.getLong(KEY_LAST_FAILED_TIME, 0)
+
+        val remaining =
+            LOCK_DURATION_MS - (System.currentTimeMillis() - lastFailed)
+
+        val seconds = remaining / 1000
+        val minutes = seconds / 60 + 1
+
+        tvError.text =
+            "Settings locked. Try again in $minutes minutes."
+
+        speak("Settings locked. Please try again later")
+    }
+
+    private fun resetLockState() {
+
+        lockPrefs.edit()
+            .putInt(KEY_FAILED_ATTEMPTS, 0)
+            .remove(KEY_LAST_FAILED_TIME)
+            .apply()
+    }
+
+    private fun clearPinFields() {
+
+        etPin1.setText("")
+        etPin2.setText("")
+        etPin1.requestFocus()
+    }
+
+    private fun disableInput() {
+
+        btnAction.isEnabled = false
+        etPin1.isEnabled = false
+        etPin2.isEnabled = false
+    }
+
+    private fun enableInput() {
+
+        btnAction.isEnabled = true
+        etPin1.isEnabled = true
+        etPin2.isEnabled = true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
+    }
+
     private fun startDeviceAuth() {
+
         val keyguardManager =
             getSystemService(KEYGUARD_SERVICE) as KeyguardManager
 
         if (!keyguardManager.isDeviceSecure) {
+
             Toast.makeText(
                 this,
                 "Please enable device lock first",
                 Toast.LENGTH_LONG
             ).show()
+
             speak("Please enable device lock first")
             return
         }
@@ -190,32 +353,42 @@ class CaregiverLoginActivity : BaseActivity() {
         resultCode: Int,
         data: Intent?
     ) {
+
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == REQUEST_DEVICE_AUTH && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_DEVICE_AUTH &&
+            resultCode == RESULT_OK
+        ) {
+
             speak("Authentication successful")
             showResetDialog()
         }
     }
 
     private fun showResetDialog() {
+
         AlertDialog.Builder(this)
             .setTitle("Reset Caregiver Access")
             .setMessage("This will reset caregiver PIN.")
             .setCancelable(false)
+
             .setPositiveButton("Reset") { _, _ ->
+
                 speak("Resetting caregiver access")
                 resetApp()
             }
+
             .setNegativeButton("Cancel") { _, _ ->
                 speak("Cancelled")
             }
+
             .show()
     }
 
     private fun resetApp() {
+
         caregiverPrefs.clearPin()
-        caregiverPrefs.resetLock()
+        resetLockState()
 
         val intent =
             Intent(this, CaregiverLoginActivity::class.java)
