@@ -68,7 +68,7 @@ class HomeActivity : AppCompatActivity() {
         startClock()
         monitorBattery()
 
-        findViewById<Button>(R.id.btnHelp).setOnClickListener {
+        findViewById<android.widget.LinearLayout>(R.id.btnHelp).setOnClickListener {
             startActivity(Intent(this, VoiceHelpActivity::class.java))
         }
 
@@ -79,9 +79,7 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, com.example.elderease.ui.allapps.AllAppsActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnManual).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
+
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             val intent = Intent(this, CaregiverLoginActivity::class.java)
