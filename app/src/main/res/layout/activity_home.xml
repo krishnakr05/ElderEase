@@ -1,136 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F4F4F4">
 
-    <!-- CONTENT AREA -->
-    <ScrollView
+    <!-- STATIC CONTENT -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
 
+        <!-- TOP BAR -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_height="70dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <!-- TOP BAR -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/txtTitle"
-                    android:text="ElderEase"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/txtBattery"
-                    android:text="--%"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:padding="10dp"
-                    android:background="@drawable/battery_bg"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <!-- TIME -->
             <TextView
-                android:id="@+id/txtTime"
-                android:textSize="42sp"
+                android:id="@+id/txtTitle"
+                android:text="ElderEase"
+                android:textSize="22sp"
                 android:textStyle="bold"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:id="@+id/txtDate"
-                android:textSize="16sp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
+                android:id="@+id/txtBattery"
+                android:text="--%"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:background="@drawable/battery_bg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+        </LinearLayout>
 
-            <!-- EMERGENCY + HELP -->
+        <!-- TIME -->
+        <TextView
+            android:id="@+id/txtTime"
+            android:textSize="42sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/txtDate"
+            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- EMERGENCY + HELP -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btnEmergency"
+                android:text="EMERGENCY"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/emergency_bg"
+                android:elevation="6dp"/>
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="130dp"
-                android:orientation="horizontal"
-                android:layout_marginBottom="20dp">
+                android:id="@+id/btnHelp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@drawable/help_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:elevation="6dp">
 
-                <!-- EMERGENCY BUTTON -->
-                <Button
-                    android:id="@+id/btnEmergency"
-                    android:text="EMERGENCY"
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_mic"
+                    android:tint="#FFFFFF"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:text="HELP ME"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
-                    android:textSize="22sp"
-                    android:layout_width="0dp"
-                    android:layout_weight="2"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/emergency_bg"
-                    android:elevation="6dp"/>
-
-                <!-- HELP CARD -->
-                <LinearLayout
-                    android:id="@+id/btnHelp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/help_bg"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:elevation="6dp">
-
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@drawable/ic_mic"
-                        android:tint="#FFFFFF"
-                        android:layout_marginBottom="6dp"/>
-
-                    <TextView
-                        android:text="HELP ME"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                </LinearLayout>
+                    android:textSize="16sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
-
-            <!-- VIEW ALL APPS -->
-            <Button
-                android:id="@+id/btnAllApps"
-                android:text="VIEW ALL APPS"
-                android:textStyle="bold"
-                android:layout_marginTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"/>
-
-            <!-- APP GRID -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerApps"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"/>
 
         </LinearLayout>
 
-    </ScrollView>
+        <!-- VIEW ALL APPS -->
+        <Button
+            android:id="@+id/btnAllApps"
+            android:text="VIEW ALL APPS"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"/>
+
+    </LinearLayout>
+
+
+    <!-- SCROLLABLE APPS -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerApps"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="20dp"/>
+
 
     <!-- BOTTOM NAVIGATION -->
     <LinearLayout
