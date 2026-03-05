@@ -1,6 +1,7 @@
 package com.example.elderease.ui.emergency
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -14,9 +15,11 @@ import com.example.elderease.R
 
 class EmergencyActivity : AppCompatActivity() {
 
+
     private lateinit var manager: EmergencyManager
     private lateinit var btnHelp: Button
     private lateinit var btnCancel: Button
+    private lateinit var btnViewContacts: Button
 
     private var timer: CountDownTimer? = null
     private var countdownStarted = false
@@ -31,6 +34,7 @@ class EmergencyActivity : AppCompatActivity() {
 
         btnHelp = findViewById(R.id.btnHelp)
         btnCancel = findViewById(R.id.btnCancel)
+        btnViewContacts = findViewById(R.id.btnViewContacts)
 
         btnCancel.visibility = View.INVISIBLE
 
@@ -47,11 +51,16 @@ class EmergencyActivity : AppCompatActivity() {
             Toast.makeText(this, "Emergency cancelled", Toast.LENGTH_SHORT).show()
             finish()
         }
+
+        // ⭐ Open Emergency Contacts Screen
+        btnViewContacts.setOnClickListener {
+            val intent = Intent(this, ViewEmergencyContactsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
-    // ---------------- COUNTDOWN ----------------
-
     private fun startCountdown() {
+
         timer = object : CountDownTimer(5000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
@@ -67,8 +76,6 @@ class EmergencyActivity : AppCompatActivity() {
         }.start()
     }
 
-    // ---------------- PERMISSIONS ----------------
-
     private fun checkPermissionsAndTrigger() {
 
         val callGranted = ContextCompat.checkSelfPermission(
@@ -79,14 +86,19 @@ class EmergencyActivity : AppCompatActivity() {
             this, Manifest.permission.SEND_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
-        if (callGranted && smsGranted) {
+        val locationGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (callGranted && smsGranted && locationGranted) {
             triggerSOS()
         } else {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
                     Manifest.permission.CALL_PHONE,
-                    Manifest.permission.SEND_SMS
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.ACCESS_FINE_LOCATION
                 ),
                 PERMISSION_REQUEST_EMERGENCY
             )
@@ -106,19 +118,14 @@ class EmergencyActivity : AppCompatActivity() {
         ) {
             triggerSOS()
         } else {
-            Toast.makeText(
-                this,
-                "Permissions required for SOS",
-                Toast.LENGTH_LONG
-            ).show()
-            finish()
+            Toast.makeText(this, "Permissions required for SOS", Toast.LENGTH_LONG).show()
         }
     }
-
-    // ---------------- SOS ----------------
 
     private fun triggerSOS() {
         manager.triggerSOS()
         finish()
     }
+
+
 }
