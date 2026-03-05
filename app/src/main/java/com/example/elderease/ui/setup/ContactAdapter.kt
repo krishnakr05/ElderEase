@@ -13,7 +13,7 @@ import com.example.elderease.ui.common.ContactRepository
 
 class ContactAdapter(
     private val contacts: List<ContactInfo>,
-    private val context: Context
+    private val onSelectionChanged: (ContactInfo, Boolean) -> Unit
 ) : RecyclerView.Adapter<ContactAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -32,19 +32,16 @@ class ContactAdapter(
 
         holder.name.text = contact.name
 
-        // 🔹remove old listener
-        holder.checkBox.setOnCheckedChangeListener { _, checked ->
-            contact.isSelected = checked
-            ContactRepository.saveSelectedContacts(context, contacts)
-        }
+        // 🔹 Prevent RecyclerView reuse issues
+        holder.checkBox.setOnCheckedChangeListener(null)
 
-
-        // 🔹 bind UI to data
+        // 🔹 Bind UI to data
         holder.checkBox.isChecked = contact.isSelected
 
-        // 🔹 update data from UI
+        // 🔹 Notify selection change
         holder.checkBox.setOnCheckedChangeListener { _, checked ->
             contact.isSelected = checked
+            onSelectionChanged(contact, checked)
         }
     }
 

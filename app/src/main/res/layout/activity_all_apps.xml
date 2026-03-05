@@ -3,27 +3,83 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F4F4F4"
-    android:padding="15dp">
+    android:background="#F7F7F7">
 
-    <TextView
-        android:text="All Apps"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <!-- TOP BAR -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:padding="10dp">
 
-    <SearchView
-        android:id="@+id/searchApps"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All Apps"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"/>
+
+        <Button
+            android:id="@+id/btnBackHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Home"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+    <!-- SEARCH (from master, MUST KEEP) -->
+    <android.widget.SearchView
+    android:id="@+id/searchApps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:queryHint="Search apps"
-        android:iconifiedByDefault="false"/>
+        android:iconifiedByDefault="false"
+        android:padding="10dp"/>
 
+    <!-- APPS LIST -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerAllApps"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="10dp"/>
+
+    <!-- OPTIONAL SAFETY FOOTER (good for elders) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#FFF1F1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="12dp"
+        android:elevation="6dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tap Home to return safely"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/btnHomeBottom"
+            android:layout_width="180dp"
+            android:layout_height="56dp"
+            android:text="Go to Home"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#FF6B6B"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
 
 </LinearLayout>
