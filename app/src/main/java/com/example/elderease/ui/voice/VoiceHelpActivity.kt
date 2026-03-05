@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import com.example.elderease.R
 import com.example.elderease.ui.emergency.EmergencyActivity
 import java.util.*
-
 class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private lateinit var speechRecognizer: SpeechRecognizer

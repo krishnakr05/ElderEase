@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F4F4F4">
 
-    <!-- CONTENT AREA -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,7 +41,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:padding="10dp"
-                    android:background="@drawable/battery_bg"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
@@ -50,6 +51,7 @@
                 android:textSize="42sp"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -61,87 +63,78 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-            <!-- EMERGENCY + HELP -->
+            <!-- MANUAL + HELP -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
-                android:orientation="horizontal"
-                android:layout_marginBottom="20dp">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <!-- EMERGENCY BUTTON -->
                 <Button
-                    android:id="@+id/btnEmergency"
-                    android:text="EMERGENCY"
-                    android:textColor="#FFFFFF"
+                    android:id="@+id/btnManual"
+                    android:text="MANUAL"
                     android:textStyle="bold"
-                    android:textSize="22sp"
-                    android:layout_width="0dp"
-                    android:layout_weight="2"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/emergency_bg"
-                    android:elevation="6dp"/>
-
-                <!-- HELP CARD -->
-                <LinearLayout
-                    android:id="@+id/btnHelp"
-                    android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/help_bg"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:elevation="6dp">
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/manual_bg"/>
 
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@drawable/ic_mic"
-                        android:tint="#FFFFFF"
-                        android:layout_marginBottom="6dp"/>
-
-                    <TextView
-                        android:text="HELP ME"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                </LinearLayout>
+                <Button
+                    android:id="@+id/btnHelp"
+                    android:text="HELP ME"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/help_bg"/>
 
             </LinearLayout>
 
+            <!-- EMERGENCY -->
+            <Button
+                android:id="@+id/btnEmergency"
+                android:text="EMERGENCY"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:layout_marginTop="20dp"
+                android:elevation="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@drawable/emergency_bg"/>
             <!-- VIEW ALL APPS -->
             <Button
                 android:id="@+id/btnAllApps"
                 android:text="VIEW ALL APPS"
                 android:textStyle="bold"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"/>
+                android:layout_height="50dp"
+                android:background="@drawable/manual_bg"/>
 
             <!-- APP GRID -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerApps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"/>
+                android:layout_marginTop="20dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_app"/>
 
         </LinearLayout>
-
     </ScrollView>
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- BOTTOM NAV -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:background="#FFFFFF"
-        android:orientation="horizontal"
-        android:elevation="8dp">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
-            android:text="HOME"
+            android:text="Home"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -149,7 +142,7 @@
 
         <Button
             android:id="@+id/btnContacts"
-            android:text="CONTACTS"
+            android:text="Contacts"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -157,7 +150,7 @@
 
         <Button
             android:id="@+id/btnSettings"
-            android:text="SETTINGS"
+            android:text="Settings"
             android:textStyle="bold"
             android:layout_weight="1"
             android:layout_width="0dp"

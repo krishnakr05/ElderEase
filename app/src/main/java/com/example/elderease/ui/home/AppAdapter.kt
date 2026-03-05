@@ -22,20 +22,23 @@ class AppAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-        holder.bind(app)
-    }
 
-    override fun getItemCount() = apps.size
+        holder.appName.text = app.label
+        holder.appIcon.setImageDrawable(app.icon)
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(app: AppInfo) {
-            itemView.findViewById<TextView>(R.id.appName).text = app.label
-            itemView.findViewById<ImageView>(R.id.appIcon).setImageDrawable(app.icon)
-
-            itemView.setOnClickListener {
-                onClick(app)
-            }
+        holder.itemView.setOnClickListener {
+            onClick(app)
         }
     }
-}
 
+    override fun getItemCount(): Int {
+        return apps.size
+    }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        val appName: TextView = itemView.findViewById(R.id.appName)
+        val appIcon: ImageView = itemView.findViewById(R.id.appIcon)
+
+    }
+}
