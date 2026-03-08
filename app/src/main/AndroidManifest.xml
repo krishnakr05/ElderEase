@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    ```
     <!-- ================= PERMISSIONS ================= -->
 
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -10,12 +12,19 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- Declare telephony is optional -->
+    <!-- LOCATION PERMISSIONS -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
+    <!-- Telephony optional -->
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <!-- Queries for Android 11+ -->
     <queries>
+
         <intent>
             <action android:name="android.intent.action.DIAL"/>
         </intent>
@@ -25,7 +34,11 @@
         </intent>
 
         <provider android:authorities="com.android.contacts"/>
+
     </queries>
+
+    <!-- ================= APPLICATION ================= -->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -34,22 +47,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ElderEase">
 
-        <!-- HOME / LAUNCHER -->
+        <!-- MAIN LAUNCHER -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
 
-            <!-- Normal app launch (for testing) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-
-            <!-- Launcher capability -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>
@@ -57,14 +62,19 @@
         <!-- HOME -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true" />
+            android:exported="true"/>
 
         <!-- EMERGENCY -->
         <activity
             android:name=".ui.emergency.EmergencyActivity"
             android:exported="false"/>
 
-        <!-- APPS SETUP -->
+        <!-- VIEW SOS CONTACTS -->
+        <activity
+            android:name=".ui.emergency.ViewEmergencyContactsActivity"
+            android:exported="false"/>
+
+        <!-- APP SETUP -->
         <activity
             android:name=".ui.setup.SetupAppsActivity"
             android:exported="false"/>
@@ -79,27 +89,37 @@
             android:name=".ui.setup.ContactSetupActivity"
             android:exported="false"/>
 
-        <!-- VOICE -->
-        <activity android:name=".ui.voice.VoiceHelpActivity"/>
+        <!-- VOICE HELP -->
+        <activity
+            android:name=".ui.voice.VoiceHelpActivity"
+            android:exported="false"/>
 
-        <!-- CAREGIVER  -->
+        <!-- CAREGIVER LOGIN -->
         <activity
             android:name=".ui.caregiver.CaregiverLoginActivity"
-            android:exported="false" />
-        <!-- Caregiver Settings -->
+            android:exported="false"/>
+
+        <!-- CAREGIVER SETTINGS -->
         <activity
             android:name=".ui.caregiver.CaregiverSettingsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- SETTINGS -->
-        <activity android:name=".ui.settings.SettingsActivity"/>
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false"/>
 
         <!-- CONTACTS -->
-        <activity android:name=".ui.contacts.ContactsActivity"/>
+        <activity
+            android:name=".ui.contacts.ContactsActivity"
+            android:exported="false"/>
 
         <!-- ALL APPS -->
-        <activity android:name=".ui.allapps.AllAppsActivity"/>
+        <activity
+            android:name=".ui.allapps.AllAppsActivity"
+            android:exported="false"/>
 
     </application>
+    ```
 
 </manifest>
