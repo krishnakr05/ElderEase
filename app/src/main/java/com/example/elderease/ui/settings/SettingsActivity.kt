@@ -37,7 +37,7 @@ class SettingsActivity : AppCompatActivity() {
             }
 
         findViewById<android.view.View>(R.id.rowCustomization).setOnClickListener {
-            Toast.makeText(this, "Customization coming soon", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, CustomizationActivity::class.java))
         }
 
         findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {

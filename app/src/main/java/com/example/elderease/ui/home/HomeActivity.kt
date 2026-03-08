@@ -41,6 +41,9 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val showAllApps = prefs.getBoolean("show_all_apps", true)
+
         setContentView(R.layout.activity_home)
 
         recyclerView = findViewById(R.id.recyclerApps)
@@ -75,8 +78,16 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
-        findViewById<android.widget.Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, com.example.elderease.ui.allapps.AllAppsActivity::class.java))
+        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
+
+        if (showAllApps) {
+            btnAllApps.visibility = Button.VISIBLE
+        } else {
+            btnAllApps.visibility = Button.GONE
+        }
+
+        btnAllApps.setOnClickListener {
+            startActivity(Intent(this, AllAppsActivity::class.java))
         }
 
 

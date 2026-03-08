@@ -109,6 +109,11 @@
             android:name=".ui.settings.SettingsActivity"
             android:exported="false"/>
 
+        <!-- SETTINGS -->
+        <activity
+            android:name=".ui.settings.CustomizationActivity"
+            android:exported="false"/>
+
         <!-- CONTACTS -->
         <activity
             android:name=".ui.contacts.ContactsActivity"
