@@ -41,10 +41,17 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContentView(R.layout.activity_home)
+
         val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
         val showAllApps = prefs.getBoolean("show_all_apps", true)
+        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
 
-        setContentView(R.layout.activity_home)
+        btnAllApps.setOnClickListener {
+            startActivity(Intent(this, AllAppsActivity::class.java))
+        }
+
+        refreshAllAppsButton()
 
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
@@ -78,19 +85,6 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
-        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
-
-        if (showAllApps) {
-            btnAllApps.visibility = Button.VISIBLE
-        } else {
-            btnAllApps.visibility = Button.GONE
-        }
-
-        btnAllApps.setOnClickListener {
-            startActivity(Intent(this, AllAppsActivity::class.java))
-        }
-
-
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             val intent = Intent(this, CaregiverLoginActivity::class.java)
@@ -102,9 +96,7 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, AllAppsActivity::class.java))
-        }
+
 
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
@@ -112,6 +104,7 @@ class HomeActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshApps()
+        refreshAllAppsButton()
     }
 
     private fun refreshApps() {
@@ -135,6 +128,17 @@ class HomeActivity : AppCompatActivity() {
 
         Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
         Log.d("HomeActivity", "Saved packages raw: ${prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "NULL")}")
+    }
+
+    private fun refreshAllAppsButton() {
+
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val showAllApps = prefs.getBoolean("show_all_apps", true)
+
+        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
+
+        btnAllApps.visibility =
+            if (showAllApps) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     private fun startClock() {

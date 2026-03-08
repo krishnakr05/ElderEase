@@ -4,12 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.elderease.R
 import com.example.elderease.ui.setup.ContactSetupActivity
 import com.example.elderease.ui.setup.FavouriteContactSetupActivity
 import com.example.elderease.ui.setup.SetupAppsActivity
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val customizationLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            setResult(RESULT_OK)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +42,12 @@ class SettingsActivity : AppCompatActivity() {
                 )
             }
 
-        findViewById<android.view.View>(R.id.rowCustomization).setOnClickListener {
-            startActivity(Intent(this, CustomizationActivity::class.java))
+        val customization = findViewById<android.view.View>(R.id.rowCustomization)
+
+        customization.setOnClickListener {
+            customizationLauncher.launch(
+                Intent(this, CustomizationActivity::class.java)
+            )
         }
 
         findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {
