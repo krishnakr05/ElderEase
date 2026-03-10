@@ -93,32 +93,11 @@ class EmergencyActivity : AppCompatActivity() {
         if (callGranted && smsGranted && locationGranted) {
             triggerSOS()
         } else {
-            ActivityCompat.requestPermissions(
+            Toast.makeText(
                 this,
-                arrayOf(
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.SEND_SMS,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ),
-                PERMISSION_REQUEST_EMERGENCY
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_EMERGENCY &&
-            grantResults.isNotEmpty() &&
-            grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-        ) {
-            triggerSOS()
-        } else {
-            Toast.makeText(this, "Permissions required for SOS", Toast.LENGTH_LONG).show()
+                "Required permissions not granted",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

@@ -103,10 +103,17 @@ class ContactsActivity : AppCompatActivity() {
     }
 
     private fun callContact(contact: ContactInfo) {
-        startActivity(
-            Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:${contact.phone}")
-            }
-        )
+
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val directCall = prefs.getBoolean("direct_call", false)
+
+        val intent = if (directCall) {
+            Intent(Intent.ACTION_CALL)
+        } else {
+            Intent(Intent.ACTION_DIAL)
+        }
+
+        intent.data = Uri.parse("tel:${contact.phone}")
+        startActivity(intent)
     }
 }
