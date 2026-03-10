@@ -51,7 +51,16 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {
-            Toast.makeText(this, "Default launcher setup coming soon", Toast.LENGTH_SHORT).show()
+
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
+                startActivity(intent)
+            } catch (e: Exception) {
+
+                // fallback
+                val intent = Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                startActivity(intent)
+            }
         }
     }
 }

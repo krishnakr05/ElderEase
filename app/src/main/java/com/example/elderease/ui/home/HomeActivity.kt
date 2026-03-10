@@ -63,12 +63,6 @@ class HomeActivity : AppCompatActivity() {
         }
         recyclerView.adapter = appAdapter
 
-
-        appAdapter = AppAdapter(apps) { app ->
-            launchApp(app)
-        }
-        recyclerView.adapter = appAdapter
-
         refreshApps()   // initial load
 
         txtTime = findViewById(R.id.txtTime)
