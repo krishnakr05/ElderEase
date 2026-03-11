@@ -75,6 +75,12 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun speak(text: String) {
+
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val voiceEnabled = prefs.getBoolean("voice_feedback", false)
+
+        if (!voiceEnabled) return
+
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 

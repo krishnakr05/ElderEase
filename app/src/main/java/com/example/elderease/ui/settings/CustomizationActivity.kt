@@ -1,7 +1,9 @@
 package com.example.elderease.ui.settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.LinearLayout
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
@@ -21,6 +23,10 @@ class CustomizationActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("elder_settings", Context.MODE_PRIVATE)
 
+        findViewById<LinearLayout>(R.id.rowHomeCustomization).setOnClickListener {
+            startActivity(Intent(this, HomeCustomizationActivity::class.java))
+        }
+
         switchShowAllApps = findViewById(R.id.switchShowAllApps)
         switchNotificationDots = findViewById(R.id.switchNotificationDots)
         switchDirectCall = findViewById(R.id.switchDirectCall)
@@ -34,7 +40,7 @@ class CustomizationActivity : AppCompatActivity() {
         switchDirectCall.isChecked = prefs.getBoolean("direct_call", false)
         switchCaregiver.isChecked = prefs.getBoolean("caregiver_enabled", false)
         switchVibration.isChecked = false
-        switchVoiceFeedback.isChecked = false
+        switchVoiceFeedback.isChecked = prefs.getBoolean("voice_feedback", false)
 
         // Toggle View All Apps
         switchShowAllApps.setOnCheckedChangeListener { _, isChecked ->
