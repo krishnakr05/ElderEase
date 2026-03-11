@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Home Layout"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A1A"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- GRID SIZE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grid Columns"
+            android:textSize="18sp"
+            android:textColor="#444"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="20dp">
+
+            <SeekBar
+                android:id="@+id/sliderGrid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="3"
+                android:progress="1"/>
+
+            <TextView
+                android:id="@+id/labelGridValue"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="2 col"
+                android:textSize="16sp"
+                android:textColor="#1A73E8"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginStart="12dp"/>
+        </LinearLayout>
+
+        <!-- ICON SIZE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Icon Size"
+            android:textSize="18sp"
+            android:textColor="#444"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="20dp">
+
+            <SeekBar
+                android:id="@+id/sliderIcon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="96"
+                android:progress="48"/>
+
+            <TextView
+                android:id="@+id/labelIconValue"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="96dp"
+                android:textSize="16sp"
+                android:textColor="#1A73E8"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginStart="12dp"/>
+        </LinearLayout>
+
+        <!-- TEXT SIZE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Text Size"
+            android:textSize="18sp"
+            android:textColor="#444"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp">
+
+            <SeekBar
+                android:id="@+id/sliderText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="18"
+                android:progress="6"/>
+
+            <TextView
+                android:id="@+id/labelTextValue"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="18sp"
+                android:textSize="16sp"
+                android:textColor="#1A73E8"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginStart="12dp"/>
+        </LinearLayout>
+
+        <!-- LIVE PREVIEW -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Preview"
+            android:textSize="18sp"
+            android:textColor="#444"
+            android:layout_marginBottom="12dp"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:elevation="4dp"
+            android:padding="12dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/previewRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"/>
+        </FrameLayout>
+
+        <!-- Back button -->
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:text="Save &amp; Back"
+            android:textSize="18sp"
+            android:backgroundTint="#1A73E8"/>
+
+    </LinearLayout>
+</ScrollView>

@@ -23,7 +23,9 @@ class ContactsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_contacts)
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerContacts)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        val settingsPrefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val grid = settingsPrefs.getInt("home_grid", 2)
+        recyclerView.layoutManager = GridLayoutManager(this, grid)
 
         // 🔥 Load Favourite Contact Numbers
         val raw = getSharedPreferences("elder_favourites", MODE_PRIVATE)

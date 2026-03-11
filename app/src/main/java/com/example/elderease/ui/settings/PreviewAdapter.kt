@@ -1,4 +1,4 @@
-package com.example.elderease.ui.home
+package com.example.elderease.ui.settings
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,15 +7,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
-import com.example.elderease.model.AppInfo
 
-class AppAdapter(
-    private val apps: List<AppInfo>,
-    private val onClick: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppAdapter.ViewHolder>() {
+class PreviewAdapter(
+    var iconSize: Int,
+    var textSize: Float
+) : RecyclerView.Adapter<PreviewAdapter.ViewHolder>() {
 
-    var iconSize: Int = 96
-    var textSize: Float = 18f
+    // Dummy preview items
+    private val labels = listOf("Phone", "Messages", "Camera", "Photos", "Maps", "Weather")
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -24,19 +23,18 @@ class AppAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(apps[position])
+        holder.bind(labels[position % labels.size])
     }
 
-    override fun getItemCount() = apps.size
+    override fun getItemCount() = 6
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(app: AppInfo) {
+        fun bind(label: String) {
             val nameView = itemView.findViewById<TextView>(R.id.appName)
             val iconView = itemView.findViewById<ImageView>(R.id.appIcon)
 
-            nameView.text = app.label
+            nameView.text = label
             nameView.textSize = textSize
-            iconView.setImageDrawable(app.icon)
 
             val px = (iconSize * itemView.context.resources.displayMetrics.density).toInt()
             val params = iconView.layoutParams
@@ -44,7 +42,8 @@ class AppAdapter(
             params.height = px
             iconView.layoutParams = params
 
-            itemView.setOnClickListener { onClick(app) }
+            // Use a generic system icon for preview
+            iconView.setImageResource(android.R.drawable.sym_def_app_icon)
         }
     }
 }

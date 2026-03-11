@@ -109,26 +109,27 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun refreshApps() {
-        val prefs = getSharedPreferences(
-            SetupAppsActivity.PREFS_NAME,
-            MODE_PRIVATE
-        )
+        val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
+        val settingsPrefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
 
         val packages = prefs
             .getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "")
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
+            ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
             ?: emptyList()
 
         val newApps = loadSelectedApps(packages)
-
         apps.clear()
         apps.addAll(newApps)
-        appAdapter.notifyDataSetChanged()
 
-        Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
-        Log.d("HomeActivity", "Saved packages raw: ${prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "NULL")}")
+        // Apply saved customization
+        val grid = settingsPrefs.getInt("home_grid", 2)
+        val iconSize = settingsPrefs.getInt("home_icon_size", 96)
+        val textSize = settingsPrefs.getFloat("home_text_size", 18f)
+
+        recyclerView.layoutManager = GridLayoutManager(this, grid)
+        appAdapter.iconSize = iconSize
+        appAdapter.textSize = textSize
+        appAdapter.notifyDataSetChanged()
     }
 
     private fun refreshAllAppsButton() {

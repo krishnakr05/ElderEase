@@ -1,7 +1,9 @@
 package com.example.elderease.ui.settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.LinearLayout
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
@@ -20,6 +22,10 @@ class CustomizationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_customization)
 
         val prefs = getSharedPreferences("elder_settings", Context.MODE_PRIVATE)
+
+        findViewById<LinearLayout>(R.id.rowHomeCustomization).setOnClickListener {
+            startActivity(Intent(this, HomeCustomizationActivity::class.java))
+        }
 
         switchShowAllApps = findViewById(R.id.switchShowAllApps)
         switchNotificationDots = findViewById(R.id.switchNotificationDots)
