@@ -3,7 +3,9 @@ package com.example.elderease.ui.setup
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
@@ -14,7 +16,7 @@ import com.example.elderease.ui.home.HomeActivity
  * First-time setup: user picks which apps appear on the home grid.
  * Saves selection to SharedPreferences and marks setup complete so HomeActivity shows only those apps.
  */
-class SetupAppsActivity : ComponentActivity() {
+class SetupAppsActivity : AppCompatActivity() {
 
     companion object {
         const val PREFS_NAME = "favorite_apps"
@@ -26,6 +28,15 @@ class SetupAppsActivity : ComponentActivity() {
     private val items = mutableListOf<SetupAppItem>()
 
     private var mode: String = "SETUP"
+
+    private val requiredPermissions = arrayOf(
+        android.Manifest.permission.CALL_PHONE,
+        android.Manifest.permission.SEND_SMS,
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.READ_CONTACTS,
+        android.Manifest.permission.RECORD_AUDIO
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +58,39 @@ class SetupAppsActivity : ComponentActivity() {
 
         findViewById<android.widget.Button>(R.id.setupContinue).setOnClickListener {
             saveSelectionAndGoToContacts()
+        }
+
+        if (!hasAllPermissions()) {
+            requestPermissions(requiredPermissions, 101)
+        }
+    }
+
+    private fun hasAllPermissions(): Boolean {
+        return requiredPermissions.all {
+            checkSelfPermission(it) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 101) {
+
+            val granted = grantResults.all {
+                it == android.content.pm.PackageManager.PERMISSION_GRANTED
+            }
+
+            if (!granted) {
+                Toast.makeText(
+                    this,
+                    "Permissions are required for ElderEase features",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
