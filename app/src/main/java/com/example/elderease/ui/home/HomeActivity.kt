@@ -184,7 +184,12 @@ class HomeActivity : AppCompatActivity() {
     private fun launchApp(app: AppInfo) {
 
         // Speak app name
-        tts.speak("Opening ${app.label}", TextToSpeech.QUEUE_FLUSH, null, null)
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val voiceEnabled = prefs.getBoolean("voice_feedback", false)
+
+        if (voiceEnabled) {
+            tts.speak("Opening ${app.label}", TextToSpeech.QUEUE_FLUSH, null, null)
+        }
 
         app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(app.launchIntent)

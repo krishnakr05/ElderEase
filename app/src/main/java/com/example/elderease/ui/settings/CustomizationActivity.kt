@@ -34,7 +34,7 @@ class CustomizationActivity : AppCompatActivity() {
         switchDirectCall.isChecked = prefs.getBoolean("direct_call", false)
         switchCaregiver.isChecked = prefs.getBoolean("caregiver_enabled", false)
         switchVibration.isChecked = false
-        switchVoiceFeedback.isChecked = false
+        switchVoiceFeedback.isChecked = prefs.getBoolean("voice_feedback", false)
 
         // Toggle View All Apps
         switchShowAllApps.setOnCheckedChangeListener { _, isChecked ->
