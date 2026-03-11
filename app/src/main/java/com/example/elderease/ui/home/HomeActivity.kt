@@ -27,6 +27,7 @@ import android.widget.TextView
 import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
+import android.speech.tts.TextToSpeech
 
 class HomeActivity : AppCompatActivity() {
 
@@ -38,10 +39,19 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var appAdapter: AppAdapter
     private val apps = mutableListOf<AppInfo>()
 
+    private lateinit var tts: TextToSpeech
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_home)
+
+        // Text To Speech initialization
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale.US
+            }
+        }
 
         val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
         val showAllApps = prefs.getBoolean("show_all_apps", true)
@@ -55,15 +65,14 @@ class HomeActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView = findViewById(R.id.recyclerApps)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         appAdapter = AppAdapter(apps) { app ->
             launchApp(app)
         }
+
         recyclerView.adapter = appAdapter
 
-        refreshApps()   // initial load
+        refreshApps()
 
         txtTime = findViewById(R.id.txtTime)
         txtDate = findViewById(R.id.txtDate)
@@ -89,8 +98,6 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnContacts).setOnClickListener {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
-
-
 
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
@@ -175,6 +182,10 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun launchApp(app: AppInfo) {
+
+        // Speak app name
+        tts.speak("Opening ${app.label}", TextToSpeech.QUEUE_FLUSH, null, null)
+
         app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(app.launchIntent)
     }
@@ -184,5 +195,10 @@ class HomeActivity : AppCompatActivity() {
             data = Uri.parse("tel:${contact.phone}")
         }
         startActivity(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts.shutdown()
     }
 }
