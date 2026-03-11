@@ -104,35 +104,15 @@ class ContactSetupActivity : ComponentActivity() {
                 Manifest.permission.READ_CONTACTS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_CONTACTS),
-                101
-            )
-        } else {
-            loadContacts()
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == 101 &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
-            loadContacts()
-        } else {
             Toast.makeText(
                 this,
-                "Permission required to read contacts",
-                Toast.LENGTH_LONG
+                "Contacts permission not granted",
+                Toast.LENGTH_SHORT
             ).show()
+            return
         }
+
+        loadContacts()
     }
 
     private fun loadContacts() {
