@@ -17,6 +17,11 @@ import androidx.core.content.ContextCompat
 import com.example.elderease.R
 import com.example.elderease.ui.emergency.EmergencyActivity
 import java.util.*
+import android.hardware.camera2.CameraManager
+import android.content.Context
+import android.media.AudioManager
+import android.provider.Telephony
+import android.database.Cursor
 
 class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
@@ -27,6 +32,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var btnBack: ImageView
     private lateinit var btnStop: Button
     private lateinit var tts: TextToSpeech
+    private var isFlashOn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +48,17 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
 
         speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+
+            // English as base language (Malayalam also recognized)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en-IN")
+
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
         }
 
         btnBack.setOnClickListener { finish() }
@@ -120,42 +132,99 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         })
     }
 
-    // 🔥 ADVANCED COMMAND HANDLER
     private fun handleCommand(command: String) {
 
-        var clean = command.lowercase(Locale.getDefault()).trim()
+        var clean = command.trim()
 
-        // Remove common action words
         val actionWords = listOf("open", "start", "launch", "please", "the")
         actionWords.forEach {
             clean = clean.replace(it, "").trim()
         }
 
-        // 🔴 Emergency triggers
+        // Emergency
         if (clean.contains("help") ||
             clean.contains("emergency") ||
             clean.contains("danger") ||
-            clean.contains("i fell")
+            clean.contains("i fell") ||
+            clean.contains("സഹായം")
         ) {
             speak("Opening emergency screen")
             startActivity(Intent(this, EmergencyActivity::class.java))
             return
         }
 
-        // 🛑 Stop command
+        // Stop listening
         if (clean.contains("stop")) {
             stopListening()
             return
         }
 
-        // 📞 Call command
-        if (command.startsWith("call ")) {
-            val name = command.removePrefix("call ").trim()
+        // Read SMS
+        if (clean.contains("message") ||
+            clean.contains("sms") ||
+            clean.contains("സന്ദേശം")
+        ) {
+            readMessages()
+            return
+        }
+
+        // Flashlight
+        if (clean.contains("flashlight") ||
+            clean.contains("torch") ||
+            clean.contains("ടോർച്ച്") ||
+            clean.contains("ലൈറ്റ്")
+        ) {
+
+            if (clean.contains("off")) {
+                toggleFlashlight(false)
+            } else {
+                toggleFlashlight(true)
+            }
+
+            return
+        }
+
+        // Volume
+        if (clean.contains("volume") ||
+            clean.contains("sound") ||
+            clean.contains("louder") ||
+            clean.contains("ശബ്ദം")
+        ) {
+
+            when {
+
+                clean.contains("up") ||
+                        clean.contains("increase") ||
+                        clean.contains("louder") -> {
+                    changeVolume("up")
+                }
+
+                clean.contains("down") ||
+                        clean.contains("decrease") -> {
+                    changeVolume("down")
+                }
+
+                clean.contains("max") ||
+                        clean.contains("maximum") -> {
+                    changeVolume("max")
+                }
+
+                clean.contains("mute") -> {
+                    changeVolume("mute")
+                }
+            }
+
+            return
+        }
+
+        // Call command
+        if (clean.startsWith("call ")) {
+            val name = clean.removePrefix("call ").trim()
             callContact(name)
             return
         }
 
-        // Try direct contact
+        // Try contact call
         if (tryCallContact(clean)) return
 
         // Try open app
@@ -196,8 +265,101 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         return false
     }
 
-    private fun callContact(name: String) {
-        tryCallContact(name)
+    private fun readMessages() {
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_SMS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_SMS),
+                2
+            )
+            return
+        }
+
+        val cursor: Cursor? = contentResolver.query(
+            Telephony.Sms.Inbox.CONTENT_URI,
+            null,
+            null,
+            null,
+            "date DESC"
+        )
+
+        cursor?.use {
+
+            if (it.moveToFirst()) {
+
+                val bodyIndex = it.getColumnIndexOrThrow(Telephony.Sms.BODY)
+                val addressIndex = it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)
+
+                val message = it.getString(bodyIndex)
+                val sender = it.getString(addressIndex)
+
+                val speakText = "Message from $sender. $message"
+
+                txtResult.text = speakText
+                speak(speakText)
+
+            } else {
+
+                speak("You have no messages")
+
+            }
+        }
+    }
+
+    private fun toggleFlashlight(turnOn: Boolean) {
+
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+        try {
+            val cameraId = cameraManager.cameraIdList[0]
+            cameraManager.setTorchMode(cameraId, turnOn)
+
+            isFlashOn = turnOn
+
+            if (turnOn) {
+                speak("Flashlight turned on")
+            } else {
+                speak("Flashlight turned off")
+            }
+
+        } catch (e: Exception) {
+            speak("Unable to control flashlight")
+        }
+    }
+
+    private fun changeVolume(action: String) {
+
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+
+        when (action) {
+
+            "up" -> {
+                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI)
+                speak("Increasing volume")
+            }
+
+            "down" -> {
+                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI)
+                speak("Decreasing volume")
+            }
+
+            "max" -> {
+                val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, max, 0)
+                speak("Volume set to maximum")
+            }
+
+            "mute" -> {
+                audioManager.adjustVolume(AudioManager.ADJUST_MUTE, 0)
+                speak("Volume muted")
+            }
+        }
     }
 
     private fun openAppByName(appName: String): Boolean {
@@ -226,6 +388,10 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         return false
+    }
+
+    private fun callContact(name: String) {
+        tryCallContact(name)
     }
 
     override fun onDestroy() {
