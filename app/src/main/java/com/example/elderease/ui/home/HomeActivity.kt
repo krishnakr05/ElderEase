@@ -28,6 +28,9 @@ import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import android.speech.tts.TextToSpeech
+import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
+import android.view.View
 
 class HomeActivity : AppCompatActivity() {
 
@@ -57,7 +60,7 @@ class HomeActivity : AppCompatActivity() {
         val showAllApps = prefs.getBoolean("show_all_apps", true)
         val btnAllApps = findViewById<Button>(R.id.btnAllApps)
 
-        btnAllApps.setOnClickListener {
+        setPressEffect(btnAllApps) {
             startActivity(Intent(this, AllAppsActivity::class.java))
         }
 
@@ -81,25 +84,51 @@ class HomeActivity : AppCompatActivity() {
         startClock()
         monitorBattery()
 
-        findViewById<android.widget.LinearLayout>(R.id.btnHelp).setOnClickListener {
+        val btnHelp = findViewById<android.widget.LinearLayout>(R.id.btnHelp)
+        setPressEffect(btnHelp) {
             startActivity(Intent(this, VoiceHelpActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnEmergency).setOnClickListener {
+        val btnEmergency = findViewById<Button>(R.id.btnEmergency)
+        setPressEffect(btnEmergency) {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnSettings).setOnClickListener {
+        val btnSettings = findViewById<Button>(R.id.btnSettings)
+        setPressEffect(btnSettings) {
             val intent = Intent(this, CaregiverLoginActivity::class.java)
             intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
             startActivity(intent)
         }
 
-        findViewById<Button>(R.id.btnContacts).setOnClickListener {
+        val btnContacts = findViewById<Button>(R.id.btnContacts)
+        setPressEffect(btnContacts) {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
 
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
+    }
+
+    private fun setPressEffect(view: View, action: () -> Unit) {
+        view.setOnTouchListener { v, event ->
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN -> {
+                    v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).start()
+                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                    action()
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                }
+            }
+            true
+        }
     }
 
     override fun onResume() {
