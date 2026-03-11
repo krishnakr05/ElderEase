@@ -47,6 +47,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
 
+        // ⭐ Multilingual speech recognition (English + regional automatically)
         speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
 
             putExtra(
@@ -54,9 +55,8 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
 
-            // English as base language (Malayalam also recognized)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en-IN")
+            // allow system to detect language automatically
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
 
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
         }
@@ -145,8 +145,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         if (clean.contains("help") ||
             clean.contains("emergency") ||
             clean.contains("danger") ||
-            clean.contains("i fell") ||
-            clean.contains("സഹായം")
+            clean.contains("i fell")
         ) {
             speak("Opening emergency screen")
             startActivity(Intent(this, EmergencyActivity::class.java))
@@ -160,20 +159,13 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         // Read SMS
-        if (clean.contains("message") ||
-            clean.contains("sms") ||
-            clean.contains("സന്ദേശം")
-        ) {
+        if (clean.contains("message") || clean.contains("sms")) {
             readMessages()
             return
         }
 
         // Flashlight
-        if (clean.contains("flashlight") ||
-            clean.contains("torch") ||
-            clean.contains("ടോർച്ച്") ||
-            clean.contains("ലൈറ്റ്")
-        ) {
+        if (clean.contains("flashlight") || clean.contains("torch")) {
 
             if (clean.contains("off")) {
                 toggleFlashlight(false)
@@ -187,8 +179,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         // Volume
         if (clean.contains("volume") ||
             clean.contains("sound") ||
-            clean.contains("louder") ||
-            clean.contains("ശബ്ദം")
+            clean.contains("louder")
         ) {
 
             when {
@@ -224,10 +215,8 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
 
-        // Try contact call
         if (tryCallContact(clean)) return
 
-        // Try open app
         if (openAppByName(clean)) return
 
         speak("I did not understand. Please try again.")

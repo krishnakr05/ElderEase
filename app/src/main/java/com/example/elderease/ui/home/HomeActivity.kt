@@ -27,6 +27,7 @@ import android.widget.TextView
 import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
+import android.speech.tts.TextToSpeech
 
 class HomeActivity : AppCompatActivity() {
 
@@ -38,28 +39,40 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var appAdapter: AppAdapter
     private val apps = mutableListOf<AppInfo>()
 
+    private lateinit var tts: TextToSpeech
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_home)
 
-        recyclerView = findViewById(R.id.recyclerApps)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        // Text To Speech initialization
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale.US
+            }
+        }
+
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val showAllApps = prefs.getBoolean("show_all_apps", true)
+        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
+
+        btnAllApps.setOnClickListener {
+            startActivity(Intent(this, AllAppsActivity::class.java))
+        }
+
+        refreshAllAppsButton()
+
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         appAdapter = AppAdapter(apps) { app ->
             launchApp(app)
         }
+
         recyclerView.adapter = appAdapter
 
-
-        appAdapter = AppAdapter(apps) { app ->
-            launchApp(app)
-        }
-        recyclerView.adapter = appAdapter
-
-        refreshApps()   // initial load
+        refreshApps()
 
         txtTime = findViewById(R.id.txtTime)
         txtDate = findViewById(R.id.txtDate)
@@ -75,11 +88,6 @@ class HomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEmergency).setOnClickListener {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
-        findViewById<android.widget.Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, com.example.elderease.ui.allapps.AllAppsActivity::class.java))
-        }
-
-
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             val intent = Intent(this, CaregiverLoginActivity::class.java)
@@ -91,16 +99,13 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, ContactsActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnAllApps).setOnClickListener {
-            startActivity(Intent(this, AllAppsActivity::class.java))
-        }
-
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
 
     override fun onResume() {
         super.onResume()
         refreshApps()
+        refreshAllAppsButton()
     }
 
     private fun refreshApps() {
@@ -124,6 +129,17 @@ class HomeActivity : AppCompatActivity() {
 
         Log.d("HomeActivity", "Apps refreshed: ${apps.size}")
         Log.d("HomeActivity", "Saved packages raw: ${prefs.getString(SetupAppsActivity.KEY_SELECTED_PACKAGES, "NULL")}")
+    }
+
+    private fun refreshAllAppsButton() {
+
+        val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val showAllApps = prefs.getBoolean("show_all_apps", true)
+
+        val btnAllApps = findViewById<Button>(R.id.btnAllApps)
+
+        btnAllApps.visibility =
+            if (showAllApps) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     private fun startClock() {
@@ -166,6 +182,10 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun launchApp(app: AppInfo) {
+
+        // Speak app name
+        tts.speak("Opening ${app.label}", TextToSpeech.QUEUE_FLUSH, null, null)
+
         app.launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(app.launchIntent)
     }
@@ -175,5 +195,10 @@ class HomeActivity : AppCompatActivity() {
             data = Uri.parse("tel:${contact.phone}")
         }
         startActivity(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts.shutdown()
     }
 }
