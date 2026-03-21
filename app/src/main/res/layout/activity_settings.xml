@@ -18,154 +18,70 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp" />
 
-        <!-- Edit Favorite Apps -->
-        <LinearLayout
-            android:id="@+id/rowEditApps"
+        <!-- Accessibility Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accessibility"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <Switch
+            android:id="@+id/switchVoice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="?android:attr/selectableItemBackground">
+            android:text="Voice Feedback"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit Favorite Apps"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choose apps shown on the home screen"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDDDDD" />
-
-        <!-- Edit Favorite Contacts -->
-        <LinearLayout
-            android:id="@+id/rowEditContacts"
+        <Switch
+            android:id="@+id/switchVibration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="?android:attr/selectableItemBackground">
+            android:text="Vibration Feedback"
+            android:textSize="18sp"
+            android:layout_marginBottom="24dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit Favorite Contacts"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+        <!-- App Settings Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="App Settings"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Manage frequently called contacts"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDDDDD" />
-
-        <!-- Edit Emergency Contacts -->
-        <LinearLayout
-            android:id="@+id/rowEditEmergencyContacts"
+        <Button
+            android:id="@+id/btnEditApps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="?android:attr/selectableItemBackground">
+            android:text="Edit Favorite Apps"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit Emergency Contacts"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choose 3 contacts for emergencies"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDDDDD" />
-
-        <!-- Customization -->
-        <LinearLayout
-            android:id="@+id/rowCustomization"
+        <Button
+            android:id="@+id/btnEditContacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="?android:attr/selectableItemBackground">
+            android:text="Edit Favorite Contacts"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Customization"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Home layout, text size, and display options"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDDDDD" />
-
-        <!-- Set Default Launcher -->
-        <LinearLayout
-            android:id="@+id/rowDefaultLauncher"
+        <Button
+            android:id="@+id/btnCustomization"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="?android:attr/selectableItemBackground">
+            android:text="Customization"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Set Default Launcher"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Make ElderEase your home screen"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnDefaultLauncher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set Default Launcher"
+            android:textSize="18sp" />
 
     </LinearLayout>
 

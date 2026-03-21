@@ -8,8 +8,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
 import com.example.elderease.data.storage.CaregiverPrefs
-
-class CaregiverSettingsActivity : AppCompatActivity() {
+import com.example.elderease.BaseActivity
+class CaregiverSettingsActivity : BaseActivity() {
 
     private lateinit var prefs: CaregiverPrefs
 
