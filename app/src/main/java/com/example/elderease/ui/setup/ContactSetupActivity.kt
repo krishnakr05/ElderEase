@@ -1,109 +1,102 @@
 package com.example.elderease.ui.setup
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
-import com.example.elderease.model.ContactInfo
-import com.example.elderease.ui.setup.SetupAppsActivity
-import android.content.Intent
-import com.example.elderease.ui.caregiver.CaregiverLoginActivity
-import android.widget.Toast
 import com.example.elderease.data.storage.SetupState
-
+import com.example.elderease.model.ContactInfo
+import com.example.elderease.ui.caregiver.CaregiverLoginActivity
+import com.example.elderease.ui.common.ContactRepository
+import com.example.elderease.ui.home.HomeActivity
 
 class ContactSetupActivity : ComponentActivity() {
 
     private val contacts = mutableListOf<ContactInfo>()
+    private val selectedOrder = mutableListOf<ContactInfo>()  // 🔥 maintains preference order
     private lateinit var adapter: ContactAdapter
-
-    private var mode: String = "SETUP"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contact_setup)
 
-        mode = intent.getStringExtra("MODE") ?: "SETUP"
+        val mode = intent.getStringExtra("MODE") ?: "SETUP"
 
         val recyclerView = findViewById<RecyclerView>(R.id.contactList)
         val saveButton = findViewById<Button>(R.id.saveButton)
 
-        adapter = ContactAdapter(contacts, this)
+        adapter = ContactAdapter(contacts) { contact, isChecked ->
+
+            if (isChecked) {
+
+                if (selectedOrder.size >= 3) {
+                    Toast.makeText(
+                        this,
+                        "You can select only 3 emergency contacts",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    contact.isSelected = false
+                    adapter.notifyDataSetChanged()
+                    return@ContactAdapter
+                }
+
+                selectedOrder.add(contact)
+
+            } else {
+                selectedOrder.removeAll { it.phone == contact.phone }
+            }
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
         checkPermissionAndLoad()
 
         saveButton.setOnClickListener {
-            saveContacts()
-        }
-    }
 
-    // -------------------- SAVE LOGIC --------------------
+            if (selectedOrder.size != 3) {
+                Toast.makeText(
+                    this,
+                    "Please select exactly 3 emergency contacts",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
 
-    private fun saveContacts() {
+            // 🔥 Save in selection order
+            val phones = selectedOrder.map { it.phone }
+            ContactRepository.saveSelectedPhones(this, phones)
 
-        val selected = contacts.filter { it.isSelected }
+            if (mode == "SETUP") {
+                SetupState(this).markContactsDone()
+            }
 
-        if (selected.isEmpty()) {
             Toast.makeText(
                 this,
-                "Please select at least one contact",
+                "SOS contacts saved successfully",
                 Toast.LENGTH_SHORT
             ).show()
-            return
-        }
 
-        // Save selected contacts
-        val selectedIds = selected.map { it.id }
-
-        val prefs =
-            getSharedPreferences(
-                SetupAppsActivity.PREFS_NAME,
-                MODE_PRIVATE
-            )
-
-        prefs.edit()
-            .putString(
-                "selected_contact_ids",
-                selectedIds.joinToString(",")
-            )
-            .apply()
-
-        // EDIT MODE → just exit
-        if (mode == "EDIT") {
-            Toast.makeText(
-                this,
-                "Favorite contacts updated",
-                Toast.LENGTH_SHORT
-            ).show()
-            finish()
-            return
-        }
-
-        // SETUP MODE → mark contacts done
-        SetupState(this).markContactsDone()
-
-        // Go to SET PIN
-        val intent =
-            Intent(this, CaregiverLoginActivity::class.java)
-                .putExtra(
-                    "MODE",
-                    CaregiverLoginActivity.MODE_SET
+            // ✅ Let launcher decide next screen
+            if (mode == "SETUP") {
+                startActivity(
+                    Intent(this, CaregiverLoginActivity::class.java)
+                        .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
                 )
+            }
 
-        startActivity(intent)
-        finish()
+            finish()
+        }
     }
-
-    // -------------------- PERMISSIONS --------------------
 
     private fun checkPermissionAndLoad() {
         if (ContextCompat.checkSelfPermission(
@@ -111,44 +104,34 @@ class ContactSetupActivity : ComponentActivity() {
                 Manifest.permission.READ_CONTACTS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
+            Toast.makeText(
                 this,
-                arrayOf(Manifest.permission.READ_CONTACTS),
-                101
-            )
-        } else {
-            loadContacts()
+                "Contacts permission not granted",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
         }
+
+        loadContacts()
     }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == 101 &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
-            loadContacts()
-        }
-    }
-
-    // -------------------- LOAD CONTACTS --------------------
 
     private fun loadContacts() {
+
         contacts.clear()
-        val seenContactIds = HashSet<String>()
+        selectedOrder.clear()
+
+        val uniquePhones = mutableSetOf<String>()
+
+        // ✅ Load previously saved SOS contacts
+        val savedPhones = ContactRepository.loadSelectedPhones(this)
+
+        val savedSet = savedPhones.map {
+            it.replace("\\s".toRegex(), "").replace("-", "")
+        }
 
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            arrayOf(
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Phone.NUMBER
-            ),
+            null,
             null,
             null,
             null
@@ -156,44 +139,51 @@ class ContactSetupActivity : ComponentActivity() {
 
         cursor?.use {
             while (it.moveToNext()) {
-                val id = it.getString(0)
-                val name = it.getString(1)
-                val phone = it.getString(2)
 
-                if (!seenContactIds.contains(id) && !name.isNullOrBlank()) {
-                    seenContactIds.add(id)
-                    contacts.add(ContactInfo(id, name, phone))
+                val id = it.getString(
+                    it.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID
+                    )
+                )
+
+                val name = it.getString(
+                    it.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    )
+                )
+
+                var phone = it.getString(
+                    it.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                    )
+                )
+
+                phone = phone.replace("\\s".toRegex(), "")
+                    .replace("-", "")
+
+                if (uniquePhones.contains(phone)) continue
+                uniquePhones.add(phone)
+
+                val contact = ContactInfo(id, name, phone)
+
+                // ✅ Preselect previously saved contacts
+                if (savedSet.contains(phone)) {
+                    contact.isSelected = true
                 }
+
+                contacts.add(contact)
             }
         }
 
         contacts.sortBy { it.name.lowercase() }
 
-        if (mode == "EDIT") {
-            preloadSelectedContacts()
+        // ✅ Restore exact selection order
+        savedPhones.forEach { savedPhone ->
+            contacts.find { it.phone == savedPhone }?.let {
+                selectedOrder.add(it)
+            }
         }
 
         adapter.notifyDataSetChanged()
-    }
-
-    // -------------------- PRELOAD --------------------
-
-    private fun preloadSelectedContacts() {
-
-        val prefs =
-            getSharedPreferences(
-                SetupAppsActivity.PREFS_NAME,
-                MODE_PRIVATE
-            )
-
-        val savedIds =
-            prefs.getString("selected_contact_ids", "")
-                ?.split(",")
-                ?.toSet()
-                ?: emptySet()
-
-        contacts.forEach { contact ->
-            contact.isSelected = savedIds.contains(contact.id)
-        }
     }
 }

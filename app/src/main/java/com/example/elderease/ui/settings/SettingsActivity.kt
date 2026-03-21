@@ -2,97 +2,65 @@ package com.example.elderease.ui.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Switch
 import android.widget.Toast
-import com.example.elderease.BaseActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.elderease.R
-import com.example.elderease.data.storage.AccessibilityPrefs
 import com.example.elderease.ui.setup.ContactSetupActivity
+import com.example.elderease.ui.setup.FavouriteContactSetupActivity
 import com.example.elderease.ui.setup.SetupAppsActivity
 
-class SettingsActivity : BaseActivity() {
+class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var accessibilityPrefs: AccessibilityPrefs
+    private val customizationLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            setResult(RESULT_OK)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        accessibilityPrefs = AccessibilityPrefs(this)
-
-        val switchVoice = findViewById<Switch>(R.id.switchVoice)
-        val switchVibration = findViewById<Switch>(R.id.switchVibration)
-
-        // Load saved states
-        switchVoice.isChecked = accessibilityPrefs.isVoiceEnabled()
-        switchVibration.isChecked = accessibilityPrefs.isVibrationEnabled()
-
-        // Voice toggle
-        switchVoice.setOnCheckedChangeListener { _, isChecked ->
-            accessibilityPrefs.setVoiceEnabled(isChecked)
-
-            if (isChecked) {
-                speak("Voice feedback enabled")
-            } else {
-                vibrate()
-            }
+        findViewById<android.view.View>(R.id.rowEditApps).setOnClickListener {
+            startActivity(Intent(this, SetupAppsActivity::class.java).apply {
+                putExtra("MODE", "EDIT")
+            })
         }
 
-        // Vibration toggle
-        switchVibration.setOnCheckedChangeListener { _, isChecked ->
-            accessibilityPrefs.setVibrationEnabled(isChecked)
-
-            if (isChecked) {
-                speak("Vibration enabled")
-            } else {
-                speak("Vibration disabled")
-            }
+        findViewById<android.view.View>(R.id.rowEditContacts).setOnClickListener {
+            startActivity(Intent(this, FavouriteContactSetupActivity::class.java).apply {
+                putExtra("MODE", "EDIT")
+            })
         }
 
-        findViewById<Button>(R.id.btnEditApps).setOnClickListener {
-            speakAndRun("Opening app setup") {
-                startActivity(
-                    Intent(this, SetupAppsActivity::class.java).apply {
-                        putExtra("MODE", "EDIT")
-                    }
-                )
-            }
-        }
-
-        findViewById<Button>(R.id.btnEditContacts).setOnClickListener {
-            speakAndRun("Opening contact setup") {
+        findViewById<android.view.View>(R.id.rowEditEmergencyContacts)
+            .setOnClickListener {
                 startActivity(
                     Intent(this, ContactSetupActivity::class.java).apply {
-                        putExtra("MODE", "EDIT")
+                        putExtra("MODE", "EDIT_SOS")
                     }
                 )
             }
+
+        val customization = findViewById<android.view.View>(R.id.rowCustomization)
+
+        customization.setOnClickListener {
+            customizationLauncher.launch(
+                Intent(this, CustomizationActivity::class.java)
+            )
         }
 
-        findViewById<Button>(R.id.btnCustomization).setOnClickListener {
-            vibrate()
-            speak("Customization coming soon")
-            Toast.makeText(
-                this,
-                "Customization coming soon",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {
 
-        findViewById<Button>(R.id.btnDefaultLauncher).setOnClickListener {
-            vibrate()
-            speak("Default launcher setup coming soon")
-            Toast.makeText(
-                this,
-                "Default launcher setup coming soon",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
+                startActivity(intent)
+            } catch (e: Exception) {
 
-    override fun onResume() {
-        super.onResume()
-        speak("Settings screen")
+                // fallback
+                val intent = Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                startActivity(intent)
+            }
+        }
     }
 }

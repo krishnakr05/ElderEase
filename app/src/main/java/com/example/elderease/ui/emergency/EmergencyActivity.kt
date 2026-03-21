@@ -1,25 +1,27 @@
 package com.example.elderease.ui.emergency
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
-import com.example.elderease.BaseActivity
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.elderease.R
 
-class EmergencyActivity : BaseActivity() {
+class EmergencyActivity : AppCompatActivity() {
 
-    private lateinit var btnCancel: Button
+
+    private lateinit var manager: EmergencyManager
     private lateinit var btnHelp: Button
-    private lateinit var btnBack: ImageView
+    private lateinit var btnCancel: Button
+    private lateinit var btnViewContacts: Button
 
     private var timer: CountDownTimer? = null
-    private var secondsLeft = 5
     private var countdownStarted = false
 
     private val PERMISSION_REQUEST_EMERGENCY = 200
@@ -28,113 +30,81 @@ class EmergencyActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_emergency)
 
-        btnCancel = findViewById(R.id.btnCancel)
+        manager = EmergencyManager(this)
+
         btnHelp = findViewById(R.id.btnHelp)
-        btnBack = findViewById(R.id.btnBack)
+        btnCancel = findViewById(R.id.btnCancel)
+        btnViewContacts = findViewById(R.id.btnViewContacts)
 
         btnCancel.visibility = View.INVISIBLE
 
-        // Back button
-        btnBack.setOnClickListener {
-            speakAndRun("Returning to home") {
-                finish()
-            }
-        }
-
-        // HELP button
         btnHelp.setOnClickListener {
             if (!countdownStarted) {
-                vibrate()
-                speak("Emergency countdown started")
                 startCountdown()
                 countdownStarted = true
                 btnCancel.visibility = View.VISIBLE
             }
         }
 
-        // Cancel button
         btnCancel.setOnClickListener {
             timer?.cancel()
-            speakAndRun("Emergency cancelled") {
-                finish()
-            }
+            Toast.makeText(this, "Emergency cancelled", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+
+        // ⭐ Open Emergency Contacts Screen
+        btnViewContacts.setOnClickListener {
+            val intent = Intent(this, ViewEmergencyContactsActivity::class.java)
+            startActivity(intent)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        speak("Emergency screen")
-    }
-
-    private fun hasEmergencyPermissions(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CALL_PHONE
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.SEND_SMS
-                ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestEmergencyPermissions() {
-        speak("Requesting permissions")
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.CALL_PHONE,
-                Manifest.permission.SEND_SMS
-            ),
-            PERMISSION_REQUEST_EMERGENCY
-        )
-    }
-
     private fun startCountdown() {
-        secondsLeft = 5
 
         timer = object : CountDownTimer(5000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
-                btnCancel.text = "CANCEL (${secondsLeft}s)"
-
-                // Speak only at 5 and 1
-                if (secondsLeft == 5 || secondsLeft == 1) {
-                    speak(secondsLeft.toString())
-                }
-
-                secondsLeft--
+                val seconds = millisUntilFinished / 1000
+                btnCancel.text = "CANCEL ($seconds)"
             }
 
             override fun onFinish() {
-                btnCancel.text = "Calling..."
-                speak("Emergency activated")
-
-                if (hasEmergencyPermissions()) {
-                    EmergencyManager(this@EmergencyActivity).triggerSOS()
-                    finish()
-                } else {
-                    requestEmergencyPermissions()
-                }
+                btnCancel.text = "Sending help..."
+                checkPermissionsAndTrigger()
             }
 
         }.start()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    private fun checkPermissionsAndTrigger() {
 
-        if (requestCode == PERMISSION_REQUEST_EMERGENCY) {
-            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                speak("Permissions granted")
-                EmergencyManager(this).triggerSOS()
-                finish()
-            } else {
-                speak("Permission denied")
-            }
+        val callGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.CALL_PHONE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val smsGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.SEND_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val locationGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (callGranted && smsGranted && locationGranted) {
+            triggerSOS()
+        } else {
+            Toast.makeText(
+                this,
+                "Required permissions not granted",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
+
+    private fun triggerSOS() {
+        manager.triggerSOS()
+        finish()
+    }
+
+
 }
