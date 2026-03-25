@@ -36,6 +36,10 @@ class EmergencyActivity : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
         btnViewContacts = findViewById(R.id.btnViewContacts)
 
+        findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
         btnCancel.visibility = View.INVISIBLE
 
         btnHelp.setOnClickListener {

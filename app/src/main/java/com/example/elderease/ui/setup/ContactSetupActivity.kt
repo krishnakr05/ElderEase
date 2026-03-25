@@ -97,11 +97,9 @@ class ContactSetupActivity : ComponentActivity() {
 
             if (mode == "SETUP") {
                 startActivity(
-                    Intent(this, CaregiverLoginActivity::class.java)
-                        .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
+                    Intent(this, CaregiverSetupActivity::class.java)
                 )
             }
-
             finish()
         }
     }

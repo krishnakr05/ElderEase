@@ -6,14 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.BatteryManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
+import android.os.*
 import android.speech.tts.TextToSpeech
 import android.view.MotionEvent
 import android.view.View
@@ -29,11 +22,11 @@ import com.example.elderease.ui.allapps.AllAppsActivity
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import com.example.elderease.ui.contacts.ContactsActivity
 import com.example.elderease.ui.emergency.EmergencyActivity
+import com.example.elderease.ui.settings.SettingsActivity
 import com.example.elderease.ui.setup.SetupAppsActivity
 import com.example.elderease.ui.voice.VoiceHelpActivity
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class HomeActivity : AppCompatActivity() {
 
@@ -51,12 +44,14 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        tts = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
+        // TTS
+        tts = TextToSpeech(this) {
+            if (it == TextToSpeech.SUCCESS) {
                 tts.language = Locale.US
             }
         }
 
+        // All Apps button
         val btnAllApps = findViewById<Button>(R.id.btnAllApps)
         setPressEffect(btnAllApps, "Opening all apps") {
             startActivity(Intent(this, AllAppsActivity::class.java))
@@ -64,22 +59,21 @@ class HomeActivity : AppCompatActivity() {
 
         refreshAllAppsButton()
 
+        // Recycler
         recyclerView = findViewById(R.id.recyclerApps)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         appAdapter = AppAdapter(
             apps = apps,
-            onClick = { app ->
-                launchApp(app)
-            },
-            onVibrate = {
-                vibrateTap()
-            }
+            onClick = { app -> launchApp(app) },
+            onVibrate = { vibrateTap() }
         )
 
         recyclerView.adapter = appAdapter
+
         refreshApps()
 
+        // Top info
         txtTime = findViewById(R.id.txtTime)
         txtDate = findViewById(R.id.txtDate)
         txtBattery = findViewById(R.id.txtBattery)
@@ -87,23 +81,38 @@ class HomeActivity : AppCompatActivity() {
         startClock()
         monitorBattery()
 
-        val btnHelp = findViewById<android.widget.LinearLayout>(R.id.btnHelp)
-        setPressEffect(btnHelp, "Opening help me") {
+        // Help
+        val btnHelp = findViewById<View>(R.id.btnHelp)
+        setPressEffect(btnHelp, "Opening help") {
             startActivity(Intent(this, VoiceHelpActivity::class.java))
         }
 
+        // Emergency
         val btnEmergency = findViewById<Button>(R.id.btnEmergency)
         setPressEffect(btnEmergency, "Opening emergency") {
             startActivity(Intent(this, EmergencyActivity::class.java))
         }
 
+        // Settings (MERGED LOGIC ✅)
         val btnSettings = findViewById<Button>(R.id.btnSettings)
         setPressEffect(btnSettings, "Opening settings") {
-            val intent = Intent(this, CaregiverLoginActivity::class.java)
-            intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
-            startActivity(intent)
+
+            val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+            val caregiverEnabled = prefs.getBoolean("caregiver_enabled", false)
+
+            if (caregiverEnabled) {
+                val intent = Intent(this, CaregiverLoginActivity::class.java)
+                intent.putExtra(
+                    CaregiverLoginActivity.EXTRA_MODE,
+                    CaregiverLoginActivity.MODE_VERIFY
+                )
+                startActivity(intent)
+            } else {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
 
+        // Contacts
         val btnContacts = findViewById<Button>(R.id.btnContacts)
         setPressEffect(btnContacts, "Opening contacts") {
             startActivity(Intent(this, ContactsActivity::class.java))
@@ -111,6 +120,10 @@ class HomeActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.txtTitle).text = "ElderEase"
     }
+
+    // =========================
+    // FEEDBACK SYSTEM
+    // =========================
 
     private fun isVoiceFeedbackEnabled(): Boolean {
         val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
@@ -126,19 +139,18 @@ class HomeActivity : AppCompatActivity() {
         if (!isVibrationFeedbackEnabled()) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibratorManager =
+                getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator.vibrate(
                 VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE)
             )
         } else {
-            @Suppress("DEPRECATION")
             val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(
                     VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE)
                 )
             } else {
-                @Suppress("DEPRECATION")
                 vibrator.vibrate(40)
             }
         }
@@ -153,6 +165,7 @@ class HomeActivity : AppCompatActivity() {
     private fun setPressEffect(view: View, spokenText: String? = null, action: () -> Unit) {
         view.setOnTouchListener { v, event ->
             when (event.action) {
+
                 MotionEvent.ACTION_DOWN -> {
                     v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).start()
                     vibrateTap()
@@ -172,11 +185,24 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    // =========================
+    // LIFECYCLE
+    // =========================
+
     override fun onResume() {
         super.onResume()
         refreshApps()
         refreshAllAppsButton()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts.shutdown()
+    }
+
+    // =========================
+    // UI UPDATES
+    // =========================
 
     private fun refreshApps() {
         val prefs = getSharedPreferences(SetupAppsActivity.PREFS_NAME, MODE_PRIVATE)
@@ -190,6 +216,7 @@ class HomeActivity : AppCompatActivity() {
             ?: emptyList()
 
         val newApps = loadSelectedApps(packages)
+
         apps.clear()
         apps.addAll(newApps)
 
@@ -198,9 +225,11 @@ class HomeActivity : AppCompatActivity() {
         val textSize = settingsPrefs.getFloat("home_text_size", 18f)
 
         recyclerView.layoutManager = GridLayoutManager(this, grid)
+
         appAdapter.iconSize = iconSize
         appAdapter.textSize = textSize
         appAdapter.vibrationEnabled = isVibrationFeedbackEnabled()
+
         appAdapter.notifyDataSetChanged()
     }
 
@@ -214,26 +243,37 @@ class HomeActivity : AppCompatActivity() {
 
     private fun startClock() {
         val handler = Handler(Looper.getMainLooper())
+
         val runnable = object : Runnable {
             override fun run() {
                 val now = Date()
-                txtTime.text = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
-                txtDate.text = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
+                txtTime.text =
+                    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(now)
+                txtDate.text =
+                    SimpleDateFormat("EEEE, MMM dd", Locale.getDefault()).format(now)
+
                 handler.postDelayed(this, 1000)
             }
         }
+
         handler.post(runnable)
     }
 
     private fun monitorBattery() {
         val batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                val level =
+                    intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
                 txtBattery.text = "$level%"
             }
         }
+
         registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
     }
+
+    // =========================
+    // APP LOADING
+    // =========================
 
     private fun loadSelectedApps(packageNames: List<String>): List<AppInfo> {
         val pm = packageManager
@@ -243,9 +283,11 @@ class HomeActivity : AppCompatActivity() {
             try {
                 val launchIntent = pm.getLaunchIntentForPackage(pkg) ?: continue
                 val appInfo = pm.getApplicationInfo(pkg, 0)
+
                 val label = pm.getApplicationLabel(appInfo).toString()
                 val icon = pm.getApplicationIcon(appInfo)
-                result.add(AppInfo(label = label, icon = icon, launchIntent = launchIntent))
+
+                result.add(AppInfo(label, icon, launchIntent))
             } catch (_: PackageManager.NameNotFoundException) {
             }
         }
@@ -267,10 +309,5 @@ class HomeActivity : AppCompatActivity() {
             data = Uri.parse("tel:${contact.phone}")
         }
         startActivity(intent)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        tts.shutdown()
     }
 }

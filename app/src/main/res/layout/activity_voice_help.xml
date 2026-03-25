@@ -11,24 +11,35 @@
         android:padding="20dp">
 
         <!-- TOP BAR -->
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="64dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <ImageView
+            <Button
                 android:id="@+id/btnBack"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@android:drawable/ic_media_previous"/>
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="&lt; Back"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#EEEEEE"
+                android:textColor="#333333"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="ElderEase"
+                android:layout_weight="1"
+                android:text="Voice Help"
+                android:textSize="26sp"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_centerHorizontal="true"/>
-        </RelativeLayout>
+                android:gravity="center"
+                android:layout_marginEnd="70dp"/>
+
+        </LinearLayout>
 
         <!-- TITLE -->
         <TextView

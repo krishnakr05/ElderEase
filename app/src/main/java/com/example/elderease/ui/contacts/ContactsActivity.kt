@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.elderease.R
 import com.example.elderease.model.ContactInfo
+import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import com.example.elderease.ui.home.ContactGridAdapter
 import com.example.elderease.ui.settings.SettingsActivity
 
@@ -48,8 +49,14 @@ class ContactsActivity : AppCompatActivity() {
         val grid = settingsPrefs.getInt("home_grid", 2)
         recyclerView.layoutManager = GridLayoutManager(this, grid)
 
+        // UI setup
         findViewById<TextView>(R.id.txtTitle).text = "Contacts"
         findViewById<TextView>(R.id.txtBattery).visibility = View.GONE
+
+        // Back button (YOUR FEATURE ✅)
+        findViewById<Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
 
         findViewById<Button>(R.id.btnHome).setOnClickListener {
             finish()
@@ -57,10 +64,24 @@ class ContactsActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnContacts).isEnabled = false
 
+        // 🔥 FIXED settings security
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+            val caregiverEnabled = prefs.getBoolean("caregiver_enabled", false)
+
+            if (caregiverEnabled) {
+                val intent = Intent(this, CaregiverLoginActivity::class.java)
+                intent.putExtra(
+                    CaregiverLoginActivity.EXTRA_MODE,
+                    CaregiverLoginActivity.MODE_VERIFY
+                )
+                startActivity(intent)
+            } else {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
 
+        // Permission handling (MASTER FEATURE ✅)
         if (hasContactsPermission()) {
             setupContacts()
         } else {

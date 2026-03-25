@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -22,17 +23,22 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <!-- Queries for Android 11+ -->
     <queries>
+
         <intent>
-            <action android:name="android.intent.action.DIAL" />
+            <action android:name="android.intent.action.DIAL"/>
         </intent>
 
         <intent>
-            <action android:name="android.intent.action.CALL" />
+            <action android:name="android.intent.action.CALL"/>
         </intent>
 
-        <provider android:authorities="com.android.contacts" />
+        <provider android:authorities="com.android.contacts"/>
+
     </queries>
+
+    <!-- ================= APPLICATION ================= -->
 
     <application
         android:allowBackup="false"
@@ -42,76 +48,101 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ElderEase">
 
+        <!-- HOME / LAUNCHER -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
+            <!-- Normal app launch (for testing) -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <!-- Launcher capability -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
         </activity>
 
+        <!-- HOME -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="true" />
+            android:exported="true"/>
 
+        <!-- EMERGENCY -->
         <activity
             android:name=".ui.emergency.EmergencyActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- VIEW SOS CONTACTS -->
         <activity
             android:name=".ui.emergency.ViewEmergencyContactsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- APP SETUP -->
         <activity
             android:name=".ui.setup.SetupAppsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- FAVOURITE CONTACT SETUP -->
         <activity
             android:name=".ui.setup.FavouriteContactSetupActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- SOS CONTACT SETUP -->
         <activity
             android:name=".ui.setup.ContactSetupActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- CAREGIVER SETUP -->
+        <activity
+            android:name=".ui.setup.CaregiverSetupActivity"
+            android:exported="false"/>
+
+        <!-- VOICE HELP -->
         <activity
             android:name=".ui.voice.VoiceHelpActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- CAREGIVER LOGIN -->
         <activity
             android:name=".ui.caregiver.CaregiverLoginActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- CAREGIVER SETTINGS -->
         <activity
             android:name=".ui.caregiver.CaregiverSettingsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- SETTINGS -->
         <activity
             android:name=".ui.settings.SettingsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- CUSTOMIZATION -->
         <activity
             android:name=".ui.settings.CustomizationActivity"
-            android:exported="false" />
+            android:exported="false"/>
+
+        <!-- HOME CUSTOMIZATION -->
 
         <activity
             android:name=".ui.settings.HomeCustomizationActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- CONTACTS -->
         <activity
             android:name=".ui.contacts.ContactsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <!-- ALL APPS -->
         <activity
             android:name=".ui.allapps.AllAppsActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
     </application>
 

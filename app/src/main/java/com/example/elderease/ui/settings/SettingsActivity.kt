@@ -3,8 +3,10 @@ package com.example.elderease.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.elderease.R
 import com.example.elderease.ui.setup.ContactSetupActivity
 import com.example.elderease.ui.setup.FavouriteContactSetupActivity
@@ -36,6 +38,10 @@ class SettingsActivity : AppCompatActivity() {
             return
         }
 
+        findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
         findViewById<android.view.View>(R.id.rowEditApps).setOnClickListener {
             startActivity(Intent(this, SetupAppsActivity::class.java).apply {
                 putExtra("MODE", "EDIT")
@@ -63,6 +69,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {
+
             try {
                 startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS))
             } catch (e: Exception) {

@@ -179,7 +179,10 @@ class CaregiverLoginActivity : AppCompatActivity() {
                 }
 
                 caregiverPrefs.savePin(pin1)
-                SetupState(this).markPinDone()
+
+                // ✅ ADD THIS (this is the fix)
+                val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+                prefs.edit().putBoolean("caregiver_enabled", true).apply()
 
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
