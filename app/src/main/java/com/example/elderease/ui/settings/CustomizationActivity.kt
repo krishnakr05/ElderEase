@@ -35,6 +35,10 @@ class CustomizationActivity : AppCompatActivity() {
         switchVibration = findViewById(R.id.switchVibrationOnTap)
         switchVoiceFeedback = findViewById(R.id.switchVoiceFeedback)
 
+        findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
         // Default states
         switchShowAllApps.isChecked = prefs.getBoolean("show_all_apps", true)
         switchNotificationDots.isChecked = true

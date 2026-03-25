@@ -27,6 +27,10 @@ class ContactsActivity : AppCompatActivity() {
         val grid = settingsPrefs.getInt("home_grid", 2)
         recyclerView.layoutManager = GridLayoutManager(this, grid)
 
+        findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
         // 🔥 Load Favourite Contact Numbers
         val raw = getSharedPreferences("elder_favourites", MODE_PRIVATE)
             .getString("fav_contacts", "") ?: ""
@@ -38,9 +42,6 @@ class ContactsActivity : AppCompatActivity() {
         recyclerView.adapter = ContactGridAdapter(contacts) { contact ->
             callContact(contact)
         }
-
-        findViewById<TextView>(R.id.txtTitle).text = "Contacts"
-        findViewById<TextView>(R.id.txtBattery).visibility = View.GONE
 
         findViewById<Button>(R.id.btnHome).setOnClickListener {
             finish()

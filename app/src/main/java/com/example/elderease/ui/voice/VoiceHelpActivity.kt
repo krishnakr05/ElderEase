@@ -29,7 +29,7 @@ class VoiceHelpActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var speechIntent: Intent
     private lateinit var txtResult: TextView
     private lateinit var btnMic: ImageView
-    private lateinit var btnBack: ImageView
+    private lateinit var btnBack: Button
     private lateinit var btnStop: Button
     private lateinit var tts: TextToSpeech
     private var isFlashOn = false

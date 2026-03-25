@@ -2,6 +2,7 @@ package com.example.elderease.ui.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +21,10 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
 
         findViewById<android.view.View>(R.id.rowEditApps).setOnClickListener {
             startActivity(Intent(this, SetupAppsActivity::class.java).apply {
