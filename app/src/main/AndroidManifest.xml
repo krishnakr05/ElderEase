@@ -101,6 +101,11 @@
             android:name=".ui.setup.ContactSetupActivity"
             android:exported="false"/>
 
+        <!-- CAREGIVER SETUP -->
+        <activity
+            android:name=".ui.setup.CaregiverSetupActivity"
+            android:exported="false"/>
+
         <!-- VOICE HELP -->
         <activity
             android:name=".ui.voice.VoiceHelpActivity"

@@ -89,11 +89,9 @@ class ContactSetupActivity : ComponentActivity() {
             // ✅ Let launcher decide next screen
             if (mode == "SETUP") {
                 startActivity(
-                    Intent(this, CaregiverLoginActivity::class.java)
-                        .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
+                    Intent(this, CaregiverSetupActivity::class.java)
                 )
             }
-
             finish()
         }
     }

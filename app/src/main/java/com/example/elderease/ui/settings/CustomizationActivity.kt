@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
+import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 
 class CustomizationActivity : AppCompatActivity() {
 
@@ -61,7 +62,18 @@ class CustomizationActivity : AppCompatActivity() {
 
         // Caregiver toggle
         switchCaregiver.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("caregiver_enabled", isChecked).apply()
+
+            if (isChecked) {
+                // Enable → go set PIN first
+                startActivity(
+                    Intent(this, CaregiverLoginActivity::class.java).apply {
+                        putExtra(CaregiverLoginActivity.EXTRA_MODE, CaregiverLoginActivity.MODE_SET)
+                    }
+                )
+            } else {
+                // Disable → just turn off
+                prefs.edit().putBoolean("caregiver_enabled", false).apply()
+            }
         }
 
         // Vibration (logic later)
@@ -73,5 +85,11 @@ class CustomizationActivity : AppCompatActivity() {
         switchVoiceFeedback.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("voice_feedback", isChecked).apply()
         }
+    }
+    override fun onResume() {
+        super.onResume()
+
+        val prefs = getSharedPreferences("elder_settings", Context.MODE_PRIVATE)
+        switchCaregiver.isChecked = prefs.getBoolean("caregiver_enabled", false)
     }
 }

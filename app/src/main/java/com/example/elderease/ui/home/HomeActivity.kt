@@ -96,9 +96,20 @@ class HomeActivity : AppCompatActivity() {
 
         val btnSettings = findViewById<Button>(R.id.btnSettings)
         setPressEffect(btnSettings) {
-            val intent = Intent(this, CaregiverLoginActivity::class.java)
-            intent.putExtra("MODE", CaregiverLoginActivity.MODE_VERIFY)
-            startActivity(intent)
+            val btnSettings = findViewById<Button>(R.id.btnSettings)
+            setPressEffect(btnSettings) {
+
+                val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+                val caregiverEnabled = prefs.getBoolean("caregiver_enabled", false)
+
+                if (caregiverEnabled) {
+                    val intent = Intent(this, CaregiverLoginActivity::class.java)
+                    intent.putExtra(CaregiverLoginActivity.EXTRA_MODE, CaregiverLoginActivity.MODE_VERIFY)
+                    startActivity(intent)
+                } else {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                }
+            }
         }
 
         val btnContacts = findViewById<Button>(R.id.btnContacts)
