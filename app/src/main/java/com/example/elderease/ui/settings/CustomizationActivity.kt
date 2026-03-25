@@ -44,8 +44,8 @@ class CustomizationActivity : AppCompatActivity() {
         switchNotificationDots.isChecked = true
         switchDirectCall.isChecked = prefs.getBoolean("direct_call", false)
         switchCaregiver.isChecked = prefs.getBoolean("caregiver_enabled", false)
-        switchVibration.isChecked = false
-        switchVoiceFeedback.isChecked = prefs.getBoolean("voice_feedback", false)
+        switchVibration.isChecked = prefs.getBoolean("vibration_enabled", false)
+        switchVoiceFeedback.isChecked = prefs.getBoolean("voice_enabled", false)
 
         // Toggle View All Apps
         switchShowAllApps.setOnCheckedChangeListener { _, isChecked ->
@@ -82,12 +82,12 @@ class CustomizationActivity : AppCompatActivity() {
 
         // Vibration (logic later)
         switchVibration.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("vibration_on_tap", isChecked).apply()
+            prefs.edit().putBoolean("vibration_enabled", isChecked).apply()
         }
 
         // Voice feedback (logic later)
         switchVoiceFeedback.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("voice_feedback", isChecked).apply()
+            prefs.edit().putBoolean("voice_enabled", isChecked).apply()
         }
     }
     override fun onResume() {
