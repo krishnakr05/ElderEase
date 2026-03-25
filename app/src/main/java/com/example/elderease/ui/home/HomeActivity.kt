@@ -99,6 +99,7 @@ class HomeActivity : AppCompatActivity() {
 
             val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
             val caregiverEnabled = prefs.getBoolean("caregiver_enabled", false)
+            android.util.Log.d("ELDEREASE", "caregiver_enabled = $caregiverEnabled")
 
             if (caregiverEnabled) {
                 val intent = Intent(this, CaregiverLoginActivity::class.java)
