@@ -49,10 +49,6 @@ class ContactsActivity : AppCompatActivity() {
         val grid = settingsPrefs.getInt("home_grid", 2)
         recyclerView.layoutManager = GridLayoutManager(this, grid)
 
-        // UI setup
-        findViewById<TextView>(R.id.txtTitle).text = "Contacts"
-        findViewById<TextView>(R.id.txtBattery).visibility = View.GONE
-
         // Back button (YOUR FEATURE ✅)
         findViewById<Button>(R.id.btnBack).setOnClickListener {
             finish()
