@@ -17,12 +17,15 @@ class CaregiverSetupActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
 
         findViewById<Button>(R.id.btnSetup).setOnClickListener {
+            val caregiverPrefs = com.example.elderease.data.storage.CaregiverPrefs(this)
+            val mode = if (caregiverPrefs.isPinSet())
+                CaregiverLoginActivity.MODE_VERIFY
+            else
+                CaregiverLoginActivity.MODE_SET
+
             startActivity(
                 Intent(this, CaregiverLoginActivity::class.java).apply {
-                    putExtra(
-                        CaregiverLoginActivity.EXTRA_MODE,
-                        CaregiverLoginActivity.MODE_SET
-                    )
+                    putExtra(CaregiverLoginActivity.EXTRA_MODE, mode)
                 }
             )
             finish()
@@ -30,6 +33,10 @@ class CaregiverSetupActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnSkip).setOnClickListener {
             prefs.edit().putBoolean("caregiver_enabled", false).apply()
+
+            // Mark setup as done so app doesn't re-enter setup flow
+            val setupState = com.example.elderease.data.storage.SetupState(this)
+            setupState.markPinDone()
 
             startActivity(Intent(this, HomeActivity::class.java))
             finish()

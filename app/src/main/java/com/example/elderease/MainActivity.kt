@@ -7,6 +7,7 @@ import com.example.elderease.data.storage.CaregiverPrefs
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import com.example.elderease.ui.common.ContactRepository
 import com.example.elderease.ui.home.HomeActivity
+import com.example.elderease.ui.setup.CaregiverSetupActivity
 import com.example.elderease.ui.setup.ContactSetupActivity
 import com.example.elderease.ui.setup.FavouriteContactSetupActivity
 import com.example.elderease.ui.setup.SetupAppsActivity
@@ -38,6 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         val emergencyContacts = ContactRepository.loadSelectedPhones(this)
 
+        val elderPrefs = getSharedPreferences("elder_settings", MODE_PRIVATE)
+        val caregiverSetupDone = elderPrefs.contains("caregiver_enabled")
+
         when {
             selectedPackages.isEmpty() -> {
                 startActivity(Intent(this, SetupAppsActivity::class.java))
@@ -51,11 +55,8 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, ContactSetupActivity::class.java))
             }
 
-            !caregiverPrefs.isPinSet() -> {
-                startActivity(
-                    Intent(this, CaregiverLoginActivity::class.java)
-                        .putExtra("MODE", CaregiverLoginActivity.MODE_SET)
-                )
+            !caregiverSetupDone -> {
+                startActivity(Intent(this, CaregiverSetupActivity::class.java))
             }
 
             else -> {

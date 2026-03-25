@@ -24,18 +24,20 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         // 🔐 SECURITY CHECK (ADDED)
-        val isVerified = getSharedPreferences("ElderEasePrefs", Context.MODE_PRIVATE)
-            .getBoolean("isVerified", false)
+        val elderPrefs = getSharedPreferences("elder_settings", Context.MODE_PRIVATE)
+        val caregiverEnabled = elderPrefs.getBoolean("caregiver_enabled", false)
 
-        if (!isVerified) {
-            startActivity(
-                Intent(
-                    this,
-                    com.example.elderease.ui.caregiver.CaregiverLoginActivity::class.java
+        if (caregiverEnabled) {
+            val isVerified = getSharedPreferences("ElderEasePrefs", Context.MODE_PRIVATE)
+                .getBoolean("isVerified", false)
+
+            if (!isVerified) {
+                startActivity(
+                    Intent(this, com.example.elderease.ui.caregiver.CaregiverLoginActivity::class.java)
                 )
-            )
-            finish()
-            return
+                finish()
+                return
+            }
         }
 
         findViewById<android.widget.Button>(R.id.btnBack).setOnClickListener {
