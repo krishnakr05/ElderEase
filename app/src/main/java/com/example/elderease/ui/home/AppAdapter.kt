@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.HapticFeedbackConstants
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -13,11 +12,13 @@ import com.example.elderease.model.AppInfo
 
 class AppAdapter(
     private val apps: List<AppInfo>,
-    private val onClick: (AppInfo) -> Unit
+    private val onClick: (AppInfo) -> Unit,
+    private val onVibrate: () -> Unit
 ) : RecyclerView.Adapter<AppAdapter.ViewHolder>() {
 
     var iconSize: Int = 96
     var textSize: Float = 18f
+    var vibrationEnabled: Boolean = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -38,28 +39,30 @@ class AppAdapter(
 
         fun bind(app: AppInfo) {
             appName.text = app.label
-            appName.textSize = textSize          // your branch
+            appName.textSize = textSize
 
             appIcon.setImageDrawable(app.icon)
 
-            // your branch: dynamic icon sizing
             val px = (iconSize * itemView.context.resources.displayMetrics.density).toInt()
             val params = appIcon.layoutParams
             params.width = px
             params.height = px
             appIcon.layoutParams = params
 
-            // master: haptic + press animation
             itemView.setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         v.animate().scaleX(0.93f).scaleY(0.93f).setDuration(80).start()
-                        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        if (vibrationEnabled) {
+                            onVibrate()
+                        }
                     }
+
                     MotionEvent.ACTION_UP -> {
                         v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
                         onClick(app)
                     }
+
                     MotionEvent.ACTION_CANCEL -> {
                         v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
                     }

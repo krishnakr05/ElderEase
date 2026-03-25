@@ -1,10 +1,10 @@
 package com.example.elderease.ui.settings
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import com.example.elderease.R
 import com.example.elderease.ui.setup.ContactSetupActivity
 import com.example.elderease.ui.setup.FavouriteContactSetupActivity
@@ -21,6 +21,21 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        // 🔐 SECURITY CHECK (ADDED)
+        val isVerified = getSharedPreferences("ElderEasePrefs", Context.MODE_PRIVATE)
+            .getBoolean("isVerified", false)
+
+        if (!isVerified) {
+            startActivity(
+                Intent(
+                    this,
+                    com.example.elderease.ui.caregiver.CaregiverLoginActivity::class.java
+                )
+            )
+            finish()
+            return
+        }
+
         findViewById<android.view.View>(R.id.rowEditApps).setOnClickListener {
             startActivity(Intent(this, SetupAppsActivity::class.java).apply {
                 putExtra("MODE", "EDIT")
@@ -33,34 +48,36 @@ class SettingsActivity : AppCompatActivity() {
             })
         }
 
-        findViewById<android.view.View>(R.id.rowEditEmergencyContacts)
-            .setOnClickListener {
-                startActivity(
-                    Intent(this, ContactSetupActivity::class.java).apply {
-                        putExtra("MODE", "EDIT_SOS")
-                    }
-                )
-            }
+        findViewById<android.view.View>(R.id.rowEditEmergencyContacts).setOnClickListener {
+            startActivity(
+                Intent(this, ContactSetupActivity::class.java).apply {
+                    putExtra("MODE", "EDIT_SOS")
+                }
+            )
+        }
 
-        val customization = findViewById<android.view.View>(R.id.rowCustomization)
-
-        customization.setOnClickListener {
+        findViewById<android.view.View>(R.id.rowCustomization).setOnClickListener {
             customizationLauncher.launch(
                 Intent(this, CustomizationActivity::class.java)
             )
         }
 
         findViewById<android.view.View>(R.id.rowDefaultLauncher).setOnClickListener {
-
             try {
-                val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
-                startActivity(intent)
+                startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS))
             } catch (e: Exception) {
-
-                // fallback
-                val intent = Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-                startActivity(intent)
+                startActivity(Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
             }
         }
+    }
+
+    // 🔐 RESET VERIFICATION WHEN LEAVING SETTINGS (ADDED)
+    override fun onDestroy() {
+        super.onDestroy()
+
+        getSharedPreferences("ElderEasePrefs", Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("isVerified", false)
+            .apply()
     }
 }

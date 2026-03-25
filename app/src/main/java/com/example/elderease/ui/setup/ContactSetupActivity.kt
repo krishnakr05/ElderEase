@@ -8,7 +8,7 @@ import android.provider.ContactsContract
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,13 +17,25 @@ import com.example.elderease.data.storage.SetupState
 import com.example.elderease.model.ContactInfo
 import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 import com.example.elderease.ui.common.ContactRepository
-import com.example.elderease.ui.home.HomeActivity
 
 class ContactSetupActivity : ComponentActivity() {
 
     private val contacts = mutableListOf<ContactInfo>()
-    private val selectedOrder = mutableListOf<ContactInfo>()  // 🔥 maintains preference order
+    private val selectedOrder = mutableListOf<ContactInfo>()
     private lateinit var adapter: ContactAdapter
+
+    private val contactsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                loadContacts()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Contacts permission is required to select emergency contacts",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +47,7 @@ class ContactSetupActivity : ComponentActivity() {
         val saveButton = findViewById<Button>(R.id.saveButton)
 
         adapter = ContactAdapter(contacts) { contact, isChecked ->
-
             if (isChecked) {
-
                 if (selectedOrder.size >= 3) {
                     Toast.makeText(
                         this,
@@ -49,8 +59,9 @@ class ContactSetupActivity : ComponentActivity() {
                     return@ContactAdapter
                 }
 
-                selectedOrder.add(contact)
-
+                if (selectedOrder.none { it.phone == contact.phone }) {
+                    selectedOrder.add(contact)
+                }
             } else {
                 selectedOrder.removeAll { it.phone == contact.phone }
             }
@@ -62,7 +73,6 @@ class ContactSetupActivity : ComponentActivity() {
         checkPermissionAndLoad()
 
         saveButton.setOnClickListener {
-
             if (selectedOrder.size != 3) {
                 Toast.makeText(
                     this,
@@ -72,7 +82,6 @@ class ContactSetupActivity : ComponentActivity() {
                 return@setOnClickListener
             }
 
-            // 🔥 Save in selection order
             val phones = selectedOrder.map { it.phone }
             ContactRepository.saveSelectedPhones(this, phones)
 
@@ -86,7 +95,6 @@ class ContactSetupActivity : ComponentActivity() {
                 Toast.LENGTH_SHORT
             ).show()
 
-            // ✅ Let launcher decide next screen
             if (mode == "SETUP") {
                 startActivity(
                     Intent(this, CaregiverLoginActivity::class.java)
@@ -102,32 +110,25 @@ class ContactSetupActivity : ComponentActivity() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_CONTACTS
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            Toast.makeText(
-                this,
-                "Contacts permission not granted",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
+            loadContacts()
+        } else {
+            contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
         }
-
-        loadContacts()
     }
 
     private fun loadContacts() {
-
         contacts.clear()
         selectedOrder.clear()
 
         val uniquePhones = mutableSetOf<String>()
 
-        // ✅ Load previously saved SOS contacts
         val savedPhones = ContactRepository.loadSelectedPhones(this)
 
         val savedSet = savedPhones.map {
             it.replace("\\s".toRegex(), "").replace("-", "")
-        }
+        }.toSet()
 
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -139,7 +140,6 @@ class ContactSetupActivity : ComponentActivity() {
 
         cursor?.use {
             while (it.moveToNext()) {
-
                 val id = it.getString(
                     it.getColumnIndexOrThrow(
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID
@@ -166,7 +166,6 @@ class ContactSetupActivity : ComponentActivity() {
 
                 val contact = ContactInfo(id, name, phone)
 
-                // ✅ Preselect previously saved contacts
                 if (savedSet.contains(phone)) {
                     contact.isSelected = true
                 }
@@ -177,9 +176,12 @@ class ContactSetupActivity : ComponentActivity() {
 
         contacts.sortBy { it.name.lowercase() }
 
-        // ✅ Restore exact selection order
         savedPhones.forEach { savedPhone ->
-            contacts.find { it.phone == savedPhone }?.let {
+            val normalizedSavedPhone = savedPhone
+                .replace("\\s".toRegex(), "")
+                .replace("-", "")
+
+            contacts.find { it.phone == normalizedSavedPhone }?.let {
                 selectedOrder.add(it)
             }
         }
