@@ -204,6 +204,11 @@ class CaregiverLoginActivity : AppCompatActivity() {
                         .putBoolean("isVerified", true)
                         .apply()
 
+                    getSharedPreferences("elder_settings", Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("caregiver_enabled", true)
+                        .apply()
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         vibrator.vibrate(
                             VibrationEffect.createPredefined(
@@ -214,8 +219,7 @@ class CaregiverLoginActivity : AppCompatActivity() {
 
                     startActivity(Intent(this, SettingsActivity::class.java))
                     finish()
-
-                } else {
+                }else {
 
                     strongVibration()
 
