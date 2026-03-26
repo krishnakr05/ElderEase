@@ -12,7 +12,6 @@ import com.example.elderease.ui.caregiver.CaregiverLoginActivity
 class CustomizationActivity : AppCompatActivity() {
 
     private lateinit var switchShowAllApps: Switch
-    private lateinit var switchNotificationDots: Switch
     private lateinit var switchDirectCall: Switch
     private lateinit var switchCaregiver: Switch
     private lateinit var switchVibration: Switch
@@ -29,7 +28,6 @@ class CustomizationActivity : AppCompatActivity() {
         }
 
         switchShowAllApps = findViewById(R.id.switchShowAllApps)
-        switchNotificationDots = findViewById(R.id.switchNotificationDots)
         switchDirectCall = findViewById(R.id.switchDirectCall)
         switchCaregiver = findViewById(R.id.switchCaregiver)
         switchVibration = findViewById(R.id.switchVibrationOnTap)
@@ -41,7 +39,6 @@ class CustomizationActivity : AppCompatActivity() {
 
         // Default states
         switchShowAllApps.isChecked = prefs.getBoolean("show_all_apps", true)
-        switchNotificationDots.isChecked = true
         switchDirectCall.isChecked = prefs.getBoolean("direct_call", false)
         switchCaregiver.isChecked = prefs.getBoolean("caregiver_enabled", false)
         switchVibration.isChecked = prefs.getBoolean("vibration_enabled", false)
@@ -53,9 +50,7 @@ class CustomizationActivity : AppCompatActivity() {
             setResult(RESULT_OK)
         }
 
-        // Notification dots always ON for now
-        switchNotificationDots.isChecked = true
-        switchNotificationDots.isEnabled = false
+
 
         switchDirectCall.setOnCheckedChangeListener { _, isChecked ->
 
